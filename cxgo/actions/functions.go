@@ -82,13 +82,12 @@ func FunctionAddParameters(fn *CXFunction, inputs, outputs []*CXArgument) {
 	}
 }
 
-// TODO : ASAHI
-/*func isParseOp(expr *CXExpression) bool {
+func isParseOp(expr *CXExpression) bool {
 	if expr.Operator != nil && expr.Operator.OpCode > START_PARSE_OPS && expr.Operator.OpCode < END_PARSE_OPS {
 		return true
 	}
 	return false
-}*/
+}
 
 // CheckUndValidTypes checks if an expression with a generic operator (operators that
 // accept `TYPE_UNDEFINED` arguments) is receiving arguments of valid types. For example,
@@ -154,7 +153,7 @@ func FunctionDeclaration(fn *CXFunction, inputs, outputs []*CXArgument, exprs []
 		ProcessReferenceAssignment(expr)
 
 		// process short declaration
-		if len(expr.Outputs) > 0 && len(expr.Inputs) > 0 && expr.Outputs[0].IsShortDeclaration && !expr.IsStructLiteral /*&& !isParseOp(expr) // TODO : ASAHI */ {
+		if len(expr.Outputs) > 0 && len(expr.Inputs) > 0 && expr.Outputs[0].IsShortDeclaration && !expr.IsStructLiteral && !isParseOp(expr) {
 			if expr.IsMethodCall {
 				fn.Expressions[i-1].Outputs[0].Type = fn.Expressions[i].Operator.Outputs[0].Type
 				fn.Expressions[i].Outputs[0].Type = fn.Expressions[i].Operator.Outputs[0].Type
