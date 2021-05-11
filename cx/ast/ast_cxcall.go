@@ -43,7 +43,7 @@ func (call *CXCall) Ccall(prgrm *CXProgram, globalInputs *[]CXValue, globalOutpu
 				}
 
 				types.WriteSlice_byte(PROGRAM.Memory, GetFinalOffset(returnFP, expr.Outputs[i]),
-					types.GetSlice_byte(PROGRAM.Memory, GetFinalOffset(fp, out), out.Size))
+					types.GetSlice_byte(PROGRAM.Memory, GetFinalOffset(fp, out), GetSize(out)))
 			}
 
 			// return the stack pointer to its previous state

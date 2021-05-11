@@ -4,7 +4,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
 	"github.com/skycoin/cx/cx/types"
-	"fmt"
+	//"fmt"
 )
 
 
@@ -43,7 +43,7 @@ func opIdentity(inputs []ast.CXValue, outputs []ast.CXValue) {
 	} else {
 		switch elt.PassBy {
 		case constants.PASSBY_VALUE:
-			fmt.Printf("PASSBY_VALUE %v AT OFFSET %v\n", inputs[0].Get_bytes(), outputs[0].Offset)
+			//fmt.Printf("PASSBY_VALUE %v AT OFFSET %v\n", inputs[0].Get_bytes(), outputs[0].Offset)
 			outputs[0].Set_bytes(inputs[0].Get_bytes())
 		case constants.PASSBY_REFERENCE:
 			outputs[0].Set_ptr(inputs[0].Offset)

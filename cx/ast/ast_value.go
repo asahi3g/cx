@@ -69,7 +69,7 @@ func (value *CXValue) Get_ptr() types.Pointer {
 }
 
 func (value *CXValue) Get_bytes() []byte {
-	return types.GetSlice_byte(PROGRAM.Memory, value.Offset, value.Arg.Size)
+	return types.GetSlice_byte(PROGRAM.Memory, value.Offset, GetSize(value.Arg))
 }
 
 func (value *CXValue) Get_str() string {

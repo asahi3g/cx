@@ -2,7 +2,7 @@ package ast
 
 import (
 	"github.com/skycoin/cx/cx/constants"
-	"fmt"
+	//"fmt"
     "github.com/skycoin/cx/cx/types"
 )
 
@@ -30,7 +30,7 @@ func GetDerefSize(arg *CXArgument) types.Pointer {
 }
 
 func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.Pointer) types.Pointer {
-	fmt.Printf("CALCULATE_DEREF\n")
+	//fmt.Printf("CALCULATE_DEREF\n")
 	var isPointer bool
 	var baseOffset types.Pointer
 	var sizeofElement types.Pointer
@@ -39,7 +39,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 	for _, op := range arg.DereferenceOperations {
 		switch op {
 		case constants.DEREF_SLICE: //TODO: Move to CalculateDereference_slice
-			fmt.Printf("DEREF_SLICE\n")
+		//	fmt.Printf("DEREF_SLICE\n")
 			if len(arg.Indexes) == 0 {
 				continue
 			}
@@ -54,8 +54,8 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			//TODO: delete
 			sizeToUse := GetDerefSize(arg) //TODO: is always arg.Size unless arg.CustomType != nil
 			finalOffset += types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeToUse
-			fmt.Printf("BASE_OFFSET %d, FINAL_OFFSET %d, SIZE_TO_USE %d\n",
-				baseOffset, finalOffset, sizeToUse)
+			//fmt.Printf("BASE_OFFSET %d, FINAL_OFFSET %d, SIZE_TO_USE %d\n",
+			//	baseOffset, finalOffset, sizeToUse)
 			if !IsValidSliceIndex(baseOffset, finalOffset, sizeToUse) {
 				panic(constants.CX_RUNTIME_SLICE_INDEX_OUT_OF_RANGE)
 			}
@@ -63,7 +63,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			idxCounter++
 
 		case constants.DEREF_ARRAY: //TODO: Move to CalculateDereference_array
-			fmt.Printf("DEREF_ARRAY\n")
+		//	fmt.Printf("DEREF_ARRAY\n")
 			if len(arg.Indexes) == 0 {
 				continue
 			}
@@ -77,14 +77,14 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 
 			baseOffset = finalOffset
 			sizeofElement = subSize * sizeToUse
-			tmpOO := types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter]))
-			tmpVV := types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
-			fmt.Printf("SIZEOF_ELEMENT %d, OFFSET %d, INDEX_OFFSET %d, INDEX_VALUE %v\n",
-				sizeofElement, GetFinalOffset(fp, arg.Indexes[idxCounter]), tmpOO, tmpVV)
+			//tmpOO := types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter]))
+			//tmpVV := types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
+			//fmt.Printf("SIZEOF_ELEMENT %d, OFFSET %d, INDEX_OFFSET %d, INDEX_VALUE %v\n",
+			//	sizeofElement, GetFinalOffset(fp, arg.Indexes[idxCounter]), tmpOO, tmpVV)
 			finalOffset += types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
 			idxCounter++
 		case constants.DEREF_POINTER: //TODO: Move to CalculateDereference_ptr
-			fmt.Printf("DEREF_SLICE\n")
+			//fmt.Printf("DEREF_SLICE\n")
 			isPointer = true
 			finalOffset = types.Read_ptr(PROGRAM.Memory, finalOffset)
 		}
