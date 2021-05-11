@@ -3,6 +3,7 @@ package actions
 import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+    "github.com/skycoin/cx/cx/types"
 	"github.com/skycoin/skycoin/src/cipher/encoder"
 )
 
@@ -22,9 +23,9 @@ func SliceLiteralExpression(typSpec int, exprs []*ast.CXExpression) []*ast.CXExp
 	slcVarExpr.Package = pkg
 	slcVar := ast.MakeArgument(symName, CurrentFile, LineNo)
 	slcVar.AddType(constants.TypeNames[typSpec])
-	slcVar = DeclarationSpecifiers(slcVar, []int{0}, constants.DECL_SLICE)
+	slcVar = DeclarationSpecifiers(slcVar, []types.Pointer{0}, constants.DECL_SLICE)
 
-	slcVar.TotalSize = constants.TYPE_POINTER_SIZE
+	slcVar.TotalSize = types.TYPE_POINTER_SIZE
 
 	slcVarExpr.Outputs = append(slcVarExpr.Outputs, slcVar)
 	slcVar.ArgDetails.Package = pkg
@@ -77,8 +78,8 @@ func SliceLiteralExpression(typSpec int, exprs []*ast.CXExpression) []*ast.CXExp
 
 			result = append(result, symExpr)
 
-			symInp.TotalSize = constants.TYPE_POINTER_SIZE
-			symOut.TotalSize = constants.TYPE_POINTER_SIZE
+			symInp.TotalSize = types.TYPE_POINTER_SIZE
+			symOut.TotalSize = types.TYPE_POINTER_SIZE
 		} else {
 			result = append(result, expr)
 		}
@@ -96,8 +97,8 @@ func SliceLiteralExpression(typSpec int, exprs []*ast.CXExpression) []*ast.CXExp
 	symInput.IsSlice = true
 	symInput.ArgDetails.Package = pkg
 
-	symInput.TotalSize = constants.TYPE_POINTER_SIZE
-	symOutput.TotalSize = constants.TYPE_POINTER_SIZE
+	symInput.TotalSize = types.TYPE_POINTER_SIZE
+	symOutput.TotalSize = types.TYPE_POINTER_SIZE
 
 	symExpr := ast.MakeExpression(ast.Natives[constants.OP_IDENTITY], CurrentFile, LineNo)
 	symExpr.Package = pkg
@@ -183,7 +184,7 @@ func PrimaryStructLiteralExternal(impName string, ident string, strctFlds []*ast
 	return result
 }
 
-func ArrayLiteralExpression(arrSizes []int, typSpec int, exprs []*ast.CXExpression) []*ast.CXExpression {
+func ArrayLiteralExpression(arrSizes []types.Pointer, typSpec int, exprs []*ast.CXExpression) []*ast.CXExpression {
 	var result []*ast.CXExpression
 
 	pkg, err := AST.GetCurrentPackage()

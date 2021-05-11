@@ -6,6 +6,7 @@ import (
 
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+	"github.com/skycoin/cx/cx/types"
 	constants2 "github.com/skycoin/cx/cxparser/constants"
 )
 
@@ -184,7 +185,7 @@ func PostfixExpressionIncDec(prevExprs []*ast.CXExpression, isInc bool) []*ast.C
 	}
 
 	var valB [4]byte
-	ast.WriteMemI32(valB[:], 0, int32(1))
+	types.Write_i32(valB[:], 0, 1)
 	val := WritePrimary(constants.TYPE_I32, valB[:], false)
 
 	expr.Package = pkg

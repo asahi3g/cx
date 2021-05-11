@@ -1,9 +1,12 @@
 package ast
 
-import "github.com/skycoin/cx/cx/constants"
+import (
+    "github.com/skycoin/cx/cx/types"
+    "github.com/skycoin/cx/cx/constants"
+)
 
 // GetSize ...
-func GetSize(arg *CXArgument) int {
+func GetSize(arg *CXArgument) types.Pointer {
 	if len(arg.Fields) > 0 {
 		return GetSize(arg.Fields[len(arg.Fields)-1])
 	}

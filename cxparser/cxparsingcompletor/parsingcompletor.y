@@ -5,6 +5,7 @@
 		"github.com/skycoin/skycoin/src/cipher/encoder"
 		"github.com/skycoin/cx/cx/ast"
 		"github.com/skycoin/cx/cx/constants"
+        "github.com/skycoin/cx/cx/types"
 		"github.com/skycoin/cx/cxparser/actions"
 	)
 
@@ -399,19 +400,19 @@ declaration_specifiers:
 			arg := ast.MakeArgument("", actions.CurrentFile, actions.LineNo).AddType("func")
 			arg.Inputs = $2
 			arg.Outputs = $3
-			$$ = actions.DeclarationSpecifiers(arg, []int{0}, constants.DECL_FUNC)
+			$$ = actions.DeclarationSpecifiers(arg, []types.Pointer{0}, constants.DECL_FUNC)
 		}
         |       MUL_OP declaration_specifiers
                 {
-			$$ = actions.DeclarationSpecifiers($2, []int{0}, constants.DECL_POINTER)
+			$$ = actions.DeclarationSpecifiers($2, []types.Pointer{0}, constants.DECL_POINTER)
                 }
         // |       LBRACK INT_LITERAL RBRACK declaration_specifiers
         //         {
-	// 		$$ = actions.DeclarationSpecifiers($4, int($2), constants.DECL_ARRAY)
+	// 		$$ = actions.DeclarationSpecifiers($4, types.Cast_sint_to_sptr($2), constants.DECL_ARRAY)
         //         }
         |       LBRACK RBRACK declaration_specifiers
                 {
-			$$ = actions.DeclarationSpecifiers($3, []int{0}, constants.DECL_SLICE)
+			$$ = actions.DeclarationSpecifiers($3, []types.Pointer{0}, constants.DECL_SLICE)
                 }
         |       type_specifier
                 {
@@ -424,12 +425,12 @@ declaration_specifiers:
         |       indexing_literal type_specifier
                 {
 			basic := actions.DeclarationSpecifiersBasic($2)
-			$$ = actions.DeclarationSpecifiers(basic, $1, constants.DECL_ARRAY)
+			$$ = actions.DeclarationSpecifiers(basic, types.Cast_sint_to_sptr($1), constants.DECL_ARRAY)
                 }
         |       indexing_literal IDENTIFIER
                 {
 			strct := actions.DeclarationSpecifiersStruct($2, "", false, actions.CurrentFile, actions.LineNo)
-			$$ = actions.DeclarationSpecifiers(strct, $1, constants.DECL_ARRAY)
+			$$ = actions.DeclarationSpecifiers(strct, types.Cast_sint_to_sptr($1), constants.DECL_ARRAY)
                 }
         |       IDENTIFIER PERIOD IDENTIFIER
                 {
@@ -547,7 +548,7 @@ array_literal_expression:
                 }
         |       indexing_literal type_specifier LBRACE array_literal_expression_list RBRACE
                 {
-			$$ = actions.ArrayLiteralExpression($1, $2, $4)
+			$$ = actions.ArrayLiteralExpression(types.Cast_sint_to_sptr($1), $2, $4)
                 }
         |       indexing_literal type_specifier LBRACE RBRACE
                 {

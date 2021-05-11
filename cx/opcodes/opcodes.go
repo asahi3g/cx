@@ -6,6 +6,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
 	"github.com/skycoin/cx/cx/globals"
+	"github.com/skycoin/cx/cx/types"
 )
 
 // RegisterPackage registers a package on the CX standard library. This does not create a `CXPackage` structure,
@@ -65,7 +66,7 @@ func MakeNativeFunction(opCode int, inputs []*ast.CXArgument, outputs []*ast.CXA
 		OpCode:    opCode,
 	}
 
-	offset := 0
+	offset := types.Pointer(0)
 	for _, inp := range inputs {
 		inp.Offset = offset
 		offset += ast.GetSize(inp)
@@ -99,8 +100,8 @@ func dumpOpCodes(opCode int) {
 func Pointer(arg *ast.CXArgument) *ast.CXArgument {
 	arg.DeclarationSpecifiers = append(arg.DeclarationSpecifiers, constants.DECL_POINTER)
 	arg.IsPointer = true
-	arg.Size = constants.TYPE_POINTER_SIZE
-	arg.TotalSize = constants.TYPE_POINTER_SIZE
+	arg.Size = types.TYPE_POINTER_SIZE
+	arg.TotalSize = types.TYPE_POINTER_SIZE
 
 	return arg
 }

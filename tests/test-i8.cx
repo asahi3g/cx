@@ -51,6 +51,7 @@ func I16RelationalShorthand() (){
 }
 
 func main() () {
+    printf("MAIN\n")
 	I16ArithmeticFunctions()
 	I16ArithmeticShorthand()
 	I16RelationalFunctions()

@@ -11,7 +11,7 @@ import (
 	constants2 "github.com/skycoin/cx/cxparser/constants"
 
 	"github.com/skycoin/cx/cx/constants"
-	"github.com/skycoin/cx/cx/helper"
+    "github.com/skycoin/cx/cx/types"
 	"github.com/skycoin/cx/cx/util"
 )
 
@@ -219,42 +219,42 @@ func SignatureStringOfFunction(pkg *CXPackage, f *CXFunction) string {
 		f.Name, ins.String(), outs.String())
 }
 
-func getNonCollectionValue(fp int, arg, elt *CXArgument, typ string) string {
+func getNonCollectionValue(fp types.Pointer, arg, elt *CXArgument, typ string) string {
 	if arg.IsPointer {
-		return fmt.Sprintf("%v", ReadPtr(fp, elt))
+		return fmt.Sprintf("%v", types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	}
 	switch typ {
 	case "bool":
-		return fmt.Sprintf("%v", ReadBool(fp, elt))
+		return fmt.Sprintf("%v", types.Read_bool(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "str":
 		return fmt.Sprintf("%v", ReadStr(fp, elt))
 	case "i8":
-		return fmt.Sprintf("%v", ReadI8(fp, elt))
+		return fmt.Sprintf("%v", types.Read_i8(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "i16":
-		return fmt.Sprintf("%v", ReadI16(fp, elt))
+		return fmt.Sprintf("%v", types.Read_i16(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "i32":
-		return fmt.Sprintf("%v", ReadI32(fp, elt))
+		return fmt.Sprintf("%v", types.Read_i32(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "i64":
-		return fmt.Sprintf("%v", ReadI64(fp, elt))
+		return fmt.Sprintf("%v", types.Read_i64(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "ui8":
-		return fmt.Sprintf("%v", ReadUI8(fp, elt))
+		return fmt.Sprintf("%v", types.Read_ui8(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "ui16":
-		return fmt.Sprintf("%v", ReadUI16(fp, elt))
+		return fmt.Sprintf("%v", types.Read_ui16(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "ui32":
-		return fmt.Sprintf("%v", ReadUI32(fp, elt))
+		return fmt.Sprintf("%v", types.Read_ui32(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "ui64":
-		return fmt.Sprintf("%v", ReadUI64(fp, elt))
+		return fmt.Sprintf("%v", types.Read_ui64(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "f32":
-		return fmt.Sprintf("%v", ReadF32(fp, elt))
+		return fmt.Sprintf("%v", types.Read_f32(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "f64":
-		return fmt.Sprintf("%v", ReadF64(fp, elt))
+		return fmt.Sprintf("%v", types.Read_f64(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	default:
 		// then it's a struct
 		var val string
 		val = "{"
 		// for _, fld := range elt.CustomType.Fields {
 		lFlds := len(elt.CustomType.Fields)
-		off := 0
+		off := types.Pointer(0)
 		for c := 0; c < lFlds; c++ {
 			fld := elt.CustomType.Fields[c]
 			if c == lFlds-1 {
@@ -270,7 +270,7 @@ func getNonCollectionValue(fp int, arg, elt *CXArgument, typ string) string {
 }
 
 // GetPrintableValue ...
-func GetPrintableValue(fp int, arg *CXArgument) string {
+func GetPrintableValue(fp types.Pointer, arg *CXArgument) string {
 	var typ string
 	elt := GetAssignmentElement(arg)
 	if elt.CustomType != nil {
@@ -285,7 +285,7 @@ func GetPrintableValue(fp int, arg *CXArgument) string {
 		var val string
 		if len(elt.Lengths) == 1 {
 			val = "["
-			for c := 0; c < elt.Lengths[0]; c++ {
+			for c := types.Pointer(0); c < elt.Lengths[0]; c++ {
 				if c == elt.Lengths[0]-1 {
 					val += getNonCollectionValue(fp+c*elt.Size, arg, elt, typ)
 				} else {
@@ -298,12 +298,12 @@ func GetPrintableValue(fp int, arg *CXArgument) string {
 			// 5, 4, 1
 			val = ""
 
-			finalSize := 1
+			finalSize := types.Pointer(1)
 			for _, l := range elt.Lengths {
 				finalSize *= l
 			}
 
-			lens := make([]int, len(elt.Lengths))
+			lens := make([]types.Pointer, len(elt.Lengths))
 			copy(lens, elt.Lengths)
 
 			for c := 0; c < len(lens); c++ {
@@ -318,7 +318,7 @@ func GetPrintableValue(fp int, arg *CXArgument) string {
 
 			// adding first element because of formatting reasons
 			val += getNonCollectionValue(fp, arg, elt, typ)
-			for c := 1; c < finalSize; c++ {
+			for c := types.Pointer(1); c < finalSize; c++ {
 				closeCount := 0
 				for _, l := range lens {
 					if c%l == 0 && c != 0 {
@@ -529,7 +529,7 @@ func getFormattedDerefs(arg *CXArgument, includePkg bool) string {
 		idxValue := ""
 		if idx.Offset > PROGRAM.StackSize {
 			// Then it's a literal.
-			idxI32 := helper.Deserialize_i32(PROGRAM.Memory[idx.Offset : idx.Offset+constants.TYPE_POINTER_SIZE])
+			idxI32 := types.Read_ptr(PROGRAM.Memory, idx.Offset)
 			idxValue = fmt.Sprintf("%d", idxI32)
 		} else {
 			// Then let's just print the variable name.

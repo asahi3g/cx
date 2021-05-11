@@ -42,7 +42,7 @@ func RegisterOpcodes() {
 
 	//TODO: Rename OP_DEBUG, OP_DEBUG_PRINT_STACK
 	RegisterOpCode(constants.OP_DEBUG, "debug", opDebug, nil, nil)
-	RegisterOpCode(constants.OP_SERIALIZE, "serialize", opSerialize, In(ast.ConstCxArg_Affordance), Out(ast.ConstCxArg_UI8))
+	RegisterOpCode(constants.OP_SERIALIZE, "serialize", opSerialize, In(ast.ConstCxArg_Affordance), Out(ast.ConstCxArg_PTR))
 	RegisterOpCode(constants.OP_DESERIALIZE, "deserialize", opDeserialize, In(ast.ConstCxArg_I32), nil)
 
 	RegisterOpCode(constants.OP_EQUAL, "eq", nil, In(ast.ConstCxArg_UND_TYPE, ast.ConstCxArg_UND_TYPE), Out(ast.ConstCxArg_BOOL))
@@ -69,13 +69,20 @@ func RegisterOpcodes() {
 	RegisterOpCode(constants.OP_TEST, "test", opTest, In(ast.ConstCxArg_UND_TYPE, ast.ConstCxArg_UND_TYPE, ast.ConstCxArg_STR), nil)
 	RegisterOpCode(constants.OP_PANIC, "panic", opPanic, In(ast.ConstCxArg_UND_TYPE, ast.ConstCxArg_UND_TYPE, ast.ConstCxArg_STR), nil)
 
-	RegisterOpCode(constants.OP_APPEND, "append", opSliceAppend, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.Slice(constants.TYPE_UNDEFINED)))
 
 	RegisterOpCode(constants.OP_BOOL_OR, "bool.or", opBoolOr, In(ast.ConstCxArg_BOOL, ast.ConstCxArg_BOOL), Out(ast.ConstCxArg_BOOL))
 	RegisterOpCode(constants.OP_BOOL_AND, "bool.and", opBoolAnd, In(ast.ConstCxArg_BOOL, ast.ConstCxArg_BOOL), Out(ast.ConstCxArg_BOOL))
 	RegisterOpCode(constants.OP_BOOL_NOT, "bool.not", opBoolNot, In(ast.ConstCxArg_BOOL), Out(ast.ConstCxArg_BOOL))
 
+	RegisterOpCode(constants.OP_APPEND, "append", opSliceAppend, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.Slice(constants.TYPE_UNDEFINED)))
+
+	RegisterFunction("resize", opResize, In(ast.Slice(constants.TYPE_UNDEFINED), ast.ConstCxArg_I32), Out(ast.Slice(constants.TYPE_UNDEFINED)))
+	RegisterFunction("insert", opInsert, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.Slice(constants.TYPE_UNDEFINED)))
+	RegisterFunction("remove", opRemove, In(ast.Slice(constants.TYPE_UNDEFINED), ast.ConstCxArg_I32), Out(ast.Slice(constants.TYPE_UNDEFINED)))
+	RegisterFunction("copy", opCopy, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.ConstCxArg_I32))
+	
 	RegisterFunction("len", opLen, In(ast.ConstCxArg_UND_TYPE), Out(ast.ConstCxArg_I32))
+
 	RegisterFunction("printf", opPrintf, In(ast.ConstCxArg_UND_TYPE), nil)
 	RegisterFunction("sprintf", opSprintf, In(ast.ConstCxArg_UND_TYPE), Out(ast.ConstCxArg_STR))
 
@@ -471,11 +478,6 @@ func RegisterOpcodes() {
 	RegisterFunction("str.index", opStrIndex, In(ast.ConstCxArg_STR, ast.ConstCxArg_STR), Out(ast.ConstCxArg_I32))
 	RegisterFunction("str.lastindex", opStrLastIndex, In(ast.ConstCxArg_STR, ast.ConstCxArg_STR), Out(ast.ConstCxArg_I32))
 	RegisterFunction("str.trimspace", opStrTrimSpace, In(ast.ConstCxArg_STR), Out(ast.ConstCxArg_STR))
-
-	RegisterFunction("resize", opResize, In(ast.Slice(constants.TYPE_UNDEFINED), ast.ConstCxArg_I32), Out(ast.Slice(constants.TYPE_UNDEFINED)))
-	RegisterFunction("insert", opInsert, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.Slice(constants.TYPE_UNDEFINED)))
-	RegisterFunction("remove", opRemove, In(ast.Slice(constants.TYPE_UNDEFINED), ast.ConstCxArg_I32), Out(ast.Slice(constants.TYPE_UNDEFINED)))
-	RegisterFunction("copy", opCopy, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.ConstCxArg_I32))
 
 	RegisterFunction("panicIf", opPanicIf, In(ast.ConstCxArg_BOOL, ast.ConstCxArg_STR), nil)
 	RegisterFunction("panicIfNot", opPanicIfNot, In(ast.ConstCxArg_BOOL, ast.ConstCxArg_STR), nil)

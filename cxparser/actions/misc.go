@@ -3,6 +3,7 @@ package actions
 import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+    "github.com/skycoin/cx/cx/types"
 )
 
 func SelectProgram(prgrm *ast.CXProgram) {
@@ -50,7 +51,7 @@ func WritePrimary(typ int, byts []byte, isGlobal bool) []*ast.CXExpression {
 		arg.AddType(constants.TypeNames[typ])
 		arg.ArgDetails.Package = pkg
 
-		var size = len(byts)
+		size := types.Cast_int_to_ptr(len(byts))
 
 		arg.Size = constants.GetArgSize(typ)
 		arg.TotalSize = size
@@ -58,8 +59,8 @@ func WritePrimary(typ int, byts []byte, isGlobal bool) []*ast.CXExpression {
 
 		if arg.Type == constants.TYPE_STR || arg.Type == constants.TYPE_AFF {
 			arg.PassBy = constants.PASSBY_REFERENCE
-			arg.Size = constants.TYPE_POINTER_SIZE
-			arg.TotalSize = constants.TYPE_POINTER_SIZE
+			arg.Size = types.TYPE_POINTER_SIZE
+			arg.TotalSize = types.TYPE_POINTER_SIZE
 		}
 
 		// A CX program allocates min(INIT_HEAP_SIZE, MAX_HEAP_SIZE) bytes
@@ -68,18 +69,19 @@ func WritePrimary(typ int, byts []byte, isGlobal bool) []*ast.CXExpression {
 		// we'll start appending the bytes to AST.Memory.
 		// After compilation, we calculate how many bytes we need to add to have a heap segment
 		// equal to `minHeapSize()` that is allocated after the data segment.
-		if (size + AST.DataSegmentSize + AST.DataSegmentStartsAt) > len(AST.Memory) {
-			var i int
+        memSize := types.Cast_int_to_ptr(len(AST.Memory))
+		if (size + AST.DataSegmentSize + AST.DataSegmentStartsAt) > memSize {
+			var i types.Pointer
 			// First we need to fill the remaining free bytes in
 			// the current `AST.Memory` slice.
-			for i = 0; i < len(AST.Memory)-AST.DataSegmentSize+AST.DataSegmentStartsAt; i++ {
+			for i = types.Pointer(0); i < memSize-AST.DataSegmentSize+AST.DataSegmentStartsAt; i++ {
 				AST.Memory[AST.DataSegmentSize+AST.DataSegmentStartsAt+i] = byts[i]
 			}
 			// Then we append the bytes that didn't fit.
 			AST.Memory = append(AST.Memory, byts[i:]...)
 		} else {
 			for i, byt := range byts {
-				AST.Memory[AST.DataSegmentSize+AST.DataSegmentStartsAt+i] = byt
+				AST.Memory[AST.DataSegmentSize+AST.DataSegmentStartsAt+types.Cast_int_to_ptr(i)] = byt
 			}
 		}
 		AST.DataSegmentSize += size
@@ -93,8 +95,8 @@ func WritePrimary(typ int, byts []byte, isGlobal bool) []*ast.CXExpression {
 	}
 }
 
-func TotalLength(lengths []int) int {
-	var total int = 1
+func TotalLength(lengths []types.Pointer) types.Pointer {
+	total := types.Pointer(1)
 	for _, i := range lengths {
 		total *= i
 	}
@@ -155,11 +157,11 @@ func AffordanceStructs(pkg *ast.CXPackage, currentFile string, lineNo int) {
 
 	fnFldInpSig := ast.MakeField("InputSignature", constants.TYPE_STR, "", 0)
 	fnFldInpSig.Size = constants.GetArgSize(constants.TYPE_STR)
-	fnFldInpSig = DeclarationSpecifiers(fnFldInpSig, []int{0}, constants.DECL_SLICE)
+	fnFldInpSig = DeclarationSpecifiers(fnFldInpSig, []types.Pointer{0}, constants.DECL_SLICE)
 
 	fnFldOutSig := ast.MakeField("OutputSignature", constants.TYPE_STR, "", 0)
 	fnFldOutSig.Size = constants.GetArgSize(constants.TYPE_STR)
-	fnFldOutSig = DeclarationSpecifiers(fnFldOutSig, []int{0}, constants.DECL_SLICE)
+	fnFldOutSig = DeclarationSpecifiers(fnFldOutSig, []types.Pointer{0}, constants.DECL_SLICE)
 
 	fnStrct.AddField(fnFldName)
 	fnStrct.AddField(fnFldInpSig)

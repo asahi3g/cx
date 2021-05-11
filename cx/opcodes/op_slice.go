@@ -3,7 +3,7 @@ package opcodes
 import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
-	"github.com/skycoin/cx/cx/helper"
+	"github.com/skycoin/cx/cx/types"
 )
 
 //TODO: Rename opSliceLen
@@ -11,11 +11,11 @@ import (
 func opLen(inputs []ast.CXValue, outputs []ast.CXValue) {
 	elt := ast.GetAssignmentElement(inputs[0].Arg)
 
-	var sliceLen int32
+	var sliceLen types.Pointer
 	if elt.IsSlice || elt.Type == constants.TYPE_AFF { //TODO: FIX
-		sliceOffset := ast.GetPointerOffset(int32(inputs[0].Offset))
+		sliceOffset := ast.GetPointerOffset(inputs[0].Offset)
 		if sliceOffset > 0 {
-			sliceLen = helper.Deserialize_i32(ast.GetSliceHeader(sliceOffset)[4:8])
+			sliceLen = types.Read_ptr(ast.GetSliceHeader(sliceOffset), 4) // TODO: PTR remove hardcode 4
 		} else if sliceOffset < 0 {
 			panic(constants.CX_RUNTIME_ERROR)
 		}
@@ -24,19 +24,19 @@ func opLen(inputs []ast.CXValue, outputs []ast.CXValue) {
 	} else if elt.Type == constants.TYPE_STR && elt.Lengths == nil {
 		var strOffset = ast.GetStrOffset(inputs[0].Offset, inputs[0].Arg.ArgDetails.Name)
 		// Checking if the string lives on the heap.
-		if int(strOffset) > ast.PROGRAM.HeapStartsAt { // TODO: Remove cast.
+		if strOffset > ast.PROGRAM.HeapStartsAt {
 			// Then it's on the heap and we need to consider
 			// the object's header.
 			strOffset += constants.OBJECT_HEADER_SIZE
 		}
 
-		sliceLen = helper.Deserialize_i32(ast.PROGRAM.Memory[strOffset : strOffset+constants.STR_HEADER_SIZE])
+		sliceLen = types.Read_ptr(ast.PROGRAM.Memory, strOffset)
 	} else {
-		sliceLen = int32(elt.Lengths[len(elt.Indexes)])
+		sliceLen = elt.Lengths[len(elt.Indexes)]
 	}
 
 	//inputs[0].Used = int8(inputs[0].Type) // TODO: Remove hacked type check
-	outputs[0].Set_i32(sliceLen)
+	outputs[0].Set_i32(types.Cast_ptr_to_i32(sliceLen))
 }
 
 //TODO: Rename OpSliceAppend
@@ -50,10 +50,10 @@ func opSliceAppend(inputs []ast.CXValue, outputs []ast.CXValue) {
 		panic(constants.CX_RUNTIME_INVALID_ARGUMENT)
 	}
 
-	var inputSliceLen int32
-	inputSliceOffset := ast.GetPointerOffset(int32(inputs[0].Offset))
+	var inputSliceLen types.Pointer
+	inputSliceOffset := ast.GetPointerOffset(inputs[0].Offset)
 	if inputSliceOffset != 0 {
-		inputSliceLen = ast.GetSliceLen(int32(inputSliceOffset))
+		inputSliceLen = ast.GetSliceLen(inputSliceOffset)
 	}
 
 	// Preparing slice in case more memory is needed for the new element.
@@ -63,8 +63,8 @@ func opSliceAppend(inputs []ast.CXValue, outputs []ast.CXValue) {
 	// could be on the heap and they could have been moved by the GC.
 
 	if inp1.Type == constants.TYPE_STR || inp1.Type == constants.TYPE_AFF {
-		var obj [4]byte
-		ast.WriteMemI32(obj[:], 0, int32(ast.GetStrOffset(inputs[1].Offset, inp1.ArgDetails.Name)))
+		var obj [types.TYPE_POINTER_SIZE]byte
+		types.Write_ptr(obj[:], 0, ast.GetStrOffset(inputs[1].Offset, inp1.ArgDetails.Name))
 		ast.SliceAppendWrite(outputSliceOffset, obj[:], inputSliceLen)
 	} else {
 		obj := inputs[1].Get_bytes()
@@ -73,7 +73,7 @@ func opSliceAppend(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 	//inputs[0].Used = int8(inputs[0].Type) // TODO: Remove hacked type check
 	//inputs[1].Used = int8(inputs[1].Type) // TODO: Remove hacked type check
-	outputs[0].SetSlice(outputSliceOffset)
+	outputs[0].Set_ptr(outputSliceOffset)
 }
 
 //TODO: Rename opSliceResize
@@ -86,10 +86,10 @@ func opResize(inputs []ast.CXValue, outputs []ast.CXValue) {
 		panic(constants.CX_RUNTIME_INVALID_ARGUMENT)
 	}
 
-	outputSliceOffset := int32(ast.SliceResize(fp, out0, inp0, inputs[1].Get_i32(), ast.GetAssignmentElement(inp0).TotalSize))
+	outputSliceOffset := ast.SliceResize(fp, out0, inp0, types.Cast_i32_to_ptr(inputs[1].Get_i32()), ast.GetAssignmentElement(inp0).TotalSize)
 
 	//inputs[0].Used = int8(inputs[0].Type) // TODO: Remove hacked type check
-	outputs[0].SetSlice(outputSliceOffset)
+	outputs[0].Set_ptr(outputSliceOffset)
 }
 
 //TODO: Rename opSliceInsertElement
@@ -102,20 +102,20 @@ func opInsert(inputs []ast.CXValue, outputs []ast.CXValue) {
 		panic(constants.CX_RUNTIME_INVALID_ARGUMENT)
 	}
 
-	index := inputs[1].Get_i32()
-	var outputSliceOffset int32
+	index := types.Cast_i32_to_ptr(inputs[1].Get_i32())
+	var outputSliceOffset types.Pointer
 	if inp2.Type == constants.TYPE_STR || inp2.Type == constants.TYPE_AFF {
-		var obj [4]byte
-		ast.WriteMemI32(obj[:], 0, int32(ast.GetStrOffset(inputs[2].Offset, inp2.ArgDetails.Name)))
-		outputSliceOffset = int32(ast.SliceInsert(fp, out0, inp0, index, obj[:]))
+		var obj [types.TYPE_POINTER_SIZE]byte
+		types.Write_ptr(obj[:], 0, ast.GetStrOffset(inputs[2].Offset, inp2.ArgDetails.Name))
+		outputSliceOffset = ast.SliceInsert(fp, out0, inp0, index, obj[:])
 	} else {
 		obj := inputs[2].Get_bytes()
-		outputSliceOffset = int32(ast.SliceInsert(fp, out0, inp0, index, obj))
+		outputSliceOffset = ast.SliceInsert(fp, out0, inp0, index, obj)
 	}
 
 	//inputs[0].Used = int8(inputs[0].Type) // TODO: Remove hacked type check
 	//inputs[2].Used = int8(inputs[2].Type) // TODO: Remove hacked type check
-	outputs[0].SetSlice(outputSliceOffset)
+	outputs[0].Set_ptr(outputSliceOffset)
 }
 
 //TODO: Rename opSliceRemoveElement
@@ -128,10 +128,10 @@ func opRemove(inputs []ast.CXValue, outputs []ast.CXValue) {
 		panic(constants.CX_RUNTIME_INVALID_ARGUMENT)
 	}
 
-	outputSliceOffset := int32(ast.SliceRemove(fp, out0, inp0, inputs[1].Get_i32(), int32(ast.GetAssignmentElement(inp0).TotalSize)))
+	outputSliceOffset := ast.SliceRemove(fp, out0, inp0, types.Cast_i32_to_ptr(inputs[1].Get_i32()), ast.GetAssignmentElement(inp0).TotalSize)
 
 	//inputs[0].Used = int8(inputs[0].Type) // TODO: Remove hacked type check
-	outputs[0].SetSlice(outputSliceOffset)
+	outputs[0].Set_ptr(outputSliceOffset)
 }
 
 //TODO: Rename opSliceCopy
@@ -150,9 +150,9 @@ func opCopy(inputs []ast.CXValue, outputs []ast.CXValue) {
 		panic(constants.CX_RUNTIME_INVALID_ARGUMENT)
 	}
 
-	var count int
+	var count types.Pointer
 	if dstInput.Type == srcInput.Type && dstOffset >= 0 && srcOffset >= 0 {
-		count = copy(ast.GetSliceData(dstOffset, dstElem.TotalSize), ast.GetSliceData(srcOffset, srcElem.TotalSize))
+		count = types.Cast_int_to_ptr(copy(ast.GetSliceData(dstOffset, dstElem.TotalSize), ast.GetSliceData(srcOffset, srcElem.TotalSize)))
 		if count%dstElem.TotalSize != 0 {
 			panic(constants.CX_RUNTIME_ERROR)
 		}
@@ -162,5 +162,5 @@ func opCopy(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 	//inputs[0].Used = int8(inputs[0].Type) // TODO: Remove hacked type check
 	//inputs[1].Used = int8(inputs[1].Type) // TODO: Remove hacked type check
-	outputs[0].Set_i32(int32(count / dstElem.TotalSize))
+	outputs[0].Set_ptr(count / dstElem.TotalSize)
 }

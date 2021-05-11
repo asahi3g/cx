@@ -1,5 +1,9 @@
 package constants
 
+import (
+    "github.com/skycoin/cx/cx/types"
+)
+
 // var COREPATH = ""
 
 const STACK_OVERFLOW_ERROR = "stack overflow"
@@ -20,34 +24,34 @@ const LITERAL_PLACEHOLDER = "*lit"
 const ID_FN = "identity"
 const INIT_FN = "initDef"
 
-const BOOL_SIZE = 1
-const I8_SIZE = 1
-const I16_SIZE = 2
-const I32_SIZE = 4
-const I64_SIZE = 8
-const F32_SIZE = 4
-const F64_SIZE = 8
-const STR_SIZE = 4
+const BOOL_SIZE = types.Pointer(1)
+const I8_SIZE = types.Pointer(1)
+const I16_SIZE = types.Pointer(2)
+const I32_SIZE = types.Pointer(4)
+const I64_SIZE = types.Pointer(8)
+const F32_SIZE = types.Pointer(4)
+const F64_SIZE = types.Pointer(8)
+const STR_SIZE = types.TYPE_POINTER_SIZE
 
-const MARK_SIZE = 1
-const OBJECT_HEADER_SIZE = 9
-const OBJECT_GC_HEADER_SIZE = 5
-const FORWARDING_ADDRESS_SIZE = 4
-const OBJECT_SIZE = 4
+const MARK_SIZE = types.Pointer(1)
+const FORWARDING_ADDRESS_SIZE = types.TYPE_POINTER_SIZE
+const OBJECT_GC_HEADER_SIZE = MARK_SIZE + FORWARDING_ADDRESS_SIZE
+const OBJECT_SIZE = types.TYPE_POINTER_SIZE
+const OBJECT_HEADER_SIZE = OBJECT_GC_HEADER_SIZE + OBJECT_SIZE
 
-const CALLSTACK_SIZE = 1000
+const CALLSTACK_SIZE types.Pointer = 1000
 
-var STACK_SIZE = 1048576     // 1 Mb
-var INIT_HEAP_SIZE = 2097152 // 2 Mb
-var MAX_HEAP_SIZE = 67108864 // 64 Mb
+var STACK_SIZE types.Pointer = 1048576     // 1 Mb
+var INIT_HEAP_SIZE types.Pointer = 2097152 // 2 Mb
+var MAX_HEAP_SIZE types.Pointer = 67108864 // 64 Mb
 var MIN_HEAP_FREE_RATIO float32 = 0.4
 var MAX_HEAP_FREE_RATIO float32 = 0.7
 
-const NULL_HEAP_ADDRESS_OFFSET = 4
-const NULL_HEAP_ADDRESS = 0
-const STR_HEADER_SIZE = 4
-const TYPE_POINTER_SIZE = 4
-const SLICE_HEADER_SIZE = 8
+
+const NULL_HEAP_ADDRESS_OFFSET = types.TYPE_POINTER_SIZE // TODO: PTR remove hardcoded offsets
+const NULL_HEAP_ADDRESS = types.Pointer(0) // TODO: PTR remove hardcoded offsets
+const STR_HEADER_SIZE = types.TYPE_POINTER_SIZE // TODO: PTR remove hardcoded offsets
+const SLICE_HEADER_SIZE = 2*types.TYPE_POINTER_SIZE // TODO: PTR remove hardcoded offsets
 
 const MAX_UINT32 = ^uint32(0)
 const MIN_UINT32 = 0
@@ -297,7 +301,7 @@ const (
 )
 
 // GetArgSize ...
-func GetArgSize(typ int) int {
+func GetArgSize(typ int) types.Pointer {
 	switch typ {
 	case TYPE_BOOL, TYPE_I8, TYPE_UI8:
 		return 1

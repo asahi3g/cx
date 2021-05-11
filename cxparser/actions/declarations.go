@@ -8,6 +8,7 @@ import (
 
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+    "github.com/skycoin/cx/cx/types"
 	globals2 "github.com/skycoin/cx/cx/globals"
 	"github.com/skycoin/cx/cxparser/globals"
 )
@@ -375,14 +376,14 @@ func DeclareLocal(declarator *ast.CXArgument, declarationSpecifiers *ast.CXArgum
 //
 // Returns the new type build from `declSpec` and `opTyp`.
 //
-func DeclarationSpecifiers(declSpec *ast.CXArgument, arrayLengths []int, opTyp int) *ast.CXArgument {
+func DeclarationSpecifiers(declSpec *ast.CXArgument, arrayLengths []types.Pointer, opTyp int) *ast.CXArgument {
 	switch opTyp {
 	case constants.DECL_POINTER:
 		declSpec.DeclarationSpecifiers = append(declSpec.DeclarationSpecifiers, constants.DECL_POINTER)
 		// if !declSpec.IsPointer {
 		declSpec.IsPointer = true
-		declSpec.Size = constants.TYPE_POINTER_SIZE
-		declSpec.TotalSize = constants.TYPE_POINTER_SIZE
+		declSpec.Size = types.TYPE_POINTER_SIZE
+		declSpec.TotalSize = types.TYPE_POINTER_SIZE
 		declSpec.IndirectionLevels++
 		// }
 		// else {
@@ -395,8 +396,8 @@ func DeclarationSpecifiers(declSpec *ast.CXArgument, arrayLengths []int, opTyp i
 
 		// declSpec.IndirectionLevels++
 
-		// pointer.Size = constants.TYPE_POINTER_SIZE
-		// pointer.TotalSize = constants.TYPE_POINTER_SIZE
+		// pointer.Size = types.TYPE_POINTER_SIZE
+		// pointer.TotalSize = types.TYPE_POINTER_SIZE
 		// }
 
 		return declSpec
@@ -424,11 +425,11 @@ func DeclarationSpecifiers(declSpec *ast.CXArgument, arrayLengths []int, opTyp i
 		// arg.IsArray = true
 		arg.PassBy = constants.PASSBY_REFERENCE
 
-		arg.Lengths = append([]int{0}, arg.Lengths...)
+		arg.Lengths = append([]types.Pointer{0}, arg.Lengths...)
 		// arg.Lengths = arrayLengths
 		// arg.TotalSize = arg.Size
 		// arg.Size = cxcore.TYPE_POINTER_SIZE
-		arg.TotalSize = constants.TYPE_POINTER_SIZE
+		arg.TotalSize = types.TYPE_POINTER_SIZE
 
 		return arg
 	case constants.DECL_BASIC:
@@ -456,10 +457,10 @@ func DeclarationSpecifiersBasic(typ int) *ast.CXArgument {
 
 	if typ == constants.TYPE_AFF {
 		// equivalent to slice of strings
-		return DeclarationSpecifiers(arg, []int{0}, constants.DECL_SLICE)
+		return DeclarationSpecifiers(arg, []types.Pointer{0}, constants.DECL_SLICE)
 	}
 
-	return DeclarationSpecifiers(arg, []int{0}, constants.DECL_BASIC)
+	return DeclarationSpecifiers(arg, []types.Pointer{0}, constants.DECL_BASIC)
 }
 
 // DeclarationSpecifiersStruct() declares a struct

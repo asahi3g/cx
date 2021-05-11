@@ -1,5 +1,9 @@
 package ast
 
+import (
+    "github.com/skycoin/cx/cx/types"
+)
+
 // CXArgument is used to define local variables, global variables,
 // literals (strings, numbers), inputs and outputs to function
 // calls. All of the fields in this structure are determined at
@@ -12,7 +16,7 @@ type CXArgument struct {
 	// `Lengths` only determines the number of dimensions and the
 	// sizes are all equal to 0 (these 0s are not used for any
 	// computation).
-	Lengths []int
+	Lengths []types.Pointer
 	// DereferenceOperations is a slice of integers where each
 	// integer corresponds a `DEREF_*` constant (for example
 	// `DEREF_ARRAY`, `DEREF_POINTER`.). A dereference is a
@@ -56,19 +60,19 @@ type CXArgument struct {
 	// the `CXArgument` is of type `TYPE_CUSTOM` (i.e. a
 	// user-defined type or struct) and the size of the struct
 	// representing the custom type is 10 bytes, then `Size == 10`.
-	Size int
+	Size types.Pointer
 	// TotalSize represents how many bytes are referenced by the
 	// `CXArgument` in total. For example, if the `CXArgument`
 	// defines an array of 5 struct instances of size 10 bytes,
 	// then `TotalSize == 50`.
-	TotalSize int
+	TotalSize types.Pointer
 	// Offset defines a relative memory offset (used in
 	// conjunction with the frame pointer), in the case of local
 	// variables, or it could define an absolute memory offset, in
 	// the case of global variables and literals. It is used by
 	// the CX virtual machine to find the bytes that represent the
 	// value of the `CXArgument`.
-	Offset int
+	Offset types.Pointer
 	// IndirectionLevels
 	IndirectionLevels int
 	DereferenceLevels int

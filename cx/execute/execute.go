@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+    "github.com/skycoin/cx/cx/types"
 	"github.com/skycoin/skycoin/src/cipher/encoder"
 	"math/rand"
 	"time"
@@ -12,6 +13,7 @@ import (
 // Only called in this file
 // TODO: What does this do? Is it named poorly?
 func ToCall(cxprogram *ast.CXProgram) *ast.CXExpression {
+	fmt.Printf("TO_CALL\n")
 	for c := cxprogram.CallCounter - 1; c >= 0; c-- {
 		if cxprogram.CallStack[c].Line+1 >= len(cxprogram.CallStack[c].Operator.Expressions) {
 			// then it'll also return from this function call; continue
@@ -25,13 +27,15 @@ func ToCall(cxprogram *ast.CXProgram) *ast.CXExpression {
 	// panic("")
 }
 
-func RunCxAst(cxprogram *ast.CXProgram, untilEnd bool, nCalls *int, untilCall int) error {
+func RunCxAst(cxprogram *ast.CXProgram, untilEnd bool, nCalls *int, untilCall types.Pointer) error {
+	fmt.Printf("RUN_CX_AST\n")
 	defer ast.RuntimeError()
 	var err error
 
 	var inputs []ast.CXValue
 	var outputs []ast.CXValue
-	for !cxprogram.Terminated && (untilEnd || *nCalls != 0) && cxprogram.CallCounter > untilCall {
+	fmt.Printf("CALL_COUNTER %d, UNTIL_CALL %d\n", cxprogram.CallCounter, untilCall)
+	for !cxprogram.Terminated && (untilEnd || *nCalls != 0) && cxprogram.CallCounter < untilCall {
 		call := &cxprogram.CallStack[cxprogram.CallCounter]
 
 		// checking if enough memory in stack
@@ -94,6 +98,7 @@ func RunCxAst(cxprogram *ast.CXProgram, untilEnd bool, nCalls *int, untilCall in
 
 // RunCompiled ...
 func RunCompiled(cxprogram *ast.CXProgram, nCalls int, args []string) error {
+	fmt.Printf("RUN_COMPILED\n")
 	_, err := cxprogram.SetCurrentCxProgram()
 	if err != nil {
 		panic(err)
@@ -153,29 +158,29 @@ func RunCompiled(cxprogram *ast.CXProgram, nCalls int, args []string) error {
 
 				// feeding os.Args
 				if osPkg, err := ast.PROGRAM.SelectPackage(constants.OS_PKG); err == nil {
-					argsOffset := 0
+					argsOffset := types.Pointer(0)
 					if osGbl, err := osPkg.GetGlobal(constants.OS_ARGS); err == nil {
 						for _, arg := range args {
 							argBytes := encoder.Serialize(arg)
-							argOffset := ast.AllocateSeq(len(argBytes) + constants.OBJECT_HEADER_SIZE)
+							argOffset := ast.AllocateSeq(types.Cast_int_to_ptr(len(argBytes)) + constants.OBJECT_HEADER_SIZE)
 
 							var header = make([]byte, constants.OBJECT_HEADER_SIZE)
-							ast.WriteMemI32(header, 5, int32(encoder.Size(arg)+constants.OBJECT_HEADER_SIZE))
+							types.Write_ptr(header, 5, types.Cast_ui64_to_ptr(encoder.Size(arg))+constants.OBJECT_HEADER_SIZE) // TODO: PTR remove hardcode 5
 							obj := append(header, argBytes...)
 
-							ast.WriteMemory(argOffset, obj)
+							types.WriteSlice_byte(cxprogram.Memory, argOffset, obj)
 
-							var argOffsetBytes [4]byte
-							ast.WriteMemI32(argOffsetBytes[:], 0, int32(argOffset))
+							var argOffsetBytes [types.TYPE_POINTER_SIZE]byte
+							types.Write_ptr(argOffsetBytes[:], 0, argOffset)
 							argsOffset = ast.WriteToSlice(argsOffset, argOffsetBytes[:])
 						}
-						ast.WriteI32(ast.GetFinalOffset(0, osGbl), int32(argsOffset))
+						types.Write_ptr(ast.PROGRAM.Memory, ast.GetFinalOffset(0, osGbl), argsOffset)
 					}
 				}
 				cxprogram.Terminated = false
 			}
 
-			if err = RunCxAst(cxprogram, untilEnd, &nCalls, -1); err != nil {
+			if err = RunCxAst(cxprogram, untilEnd, &nCalls, types.InvalidPointer); err != nil {
 				return err
 			}
 

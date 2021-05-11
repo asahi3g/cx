@@ -5,6 +5,7 @@ import (
 
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+    "github.com/skycoin/cx/cx/types"
 )
 
 // assignStructLiteralFields converts a struct literal to a series of struct field assignments.
@@ -150,7 +151,7 @@ func Assignment(to []*ast.CXExpression, assignOp string, from []*ast.CXExpressio
 			}
 			if outTypeArg.IsSlice {
 				// if from[idx].Operator.ProgramOutput[0].IsSlice {
-				sym.Lengths = append([]int{0}, sym.Lengths...)
+				sym.Lengths = append([]types.Pointer{0}, sym.Lengths...)
 				sym.DeclarationSpecifiers = append(sym.DeclarationSpecifiers, constants.DECL_SLICE)
 			}
 

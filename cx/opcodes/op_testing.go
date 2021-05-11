@@ -21,6 +21,8 @@ func assert(inputs []ast.CXValue, outputs []ast.CXValue) (same bool) {
 		byts1 = []byte(inputs[0].Get_str())
 		byts2 = []byte(inputs[1].Get_str())
 	} else {
+		fmt.Printf("V0 %v AT OFFSET %v\n", inputs[0].Get_bytes(), inputs[0].Offset)
+		fmt.Printf("V1 %v AT OFFSET %v\n", inputs[1].Get_bytes(), inputs[1].Offset)
 		byts1 = inputs[0].Get_bytes()
 		byts2 = inputs[1].Get_bytes()
 	}
@@ -66,6 +68,7 @@ func opAssertValue(inputs []ast.CXValue, outputs []ast.CXValue) {
 }
 
 func opTest(inputs []ast.CXValue, outputs []ast.CXValue) {
+	fmt.Printf("OP_TEST\n")
 	assert(inputs, outputs)
 }
 

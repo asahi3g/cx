@@ -1,6 +1,6 @@
 package main
 
-var intArray [5]i32
+var intArray [6]i32
 var longArray [5]i64
 var floatArray [5]f32
 var doubleArray [5]f64
@@ -9,8 +9,9 @@ var boolArray [5]bool
 // var stringArray [5]str
 
 func testGetElement () {
-	test(intArray[4], 5, "I32 Get element error")
-	test(longArray[2], 90L, "I64 Get element error")
+	printf("-----------------------> TEST_GET_ELEMENT\n")
+	test(intArray[4], 35, "I32 Get element error")
+	/*test(longArray[2], 90L, "I64 Get element error")
 	test(floatArray[0], 3.9, "F32 Get element error")
 	test(doubleArray[1], 70.0D, "F64 Get element error")
 	test(boolArray[4], false, "BOOL Get element error")
@@ -45,7 +46,7 @@ func testGetElement () {
 	slc = append(slc, 4)
 	test(intArray[slc[1]], 5, "")
 	
-
+*/
 	// test(stringArray[4], "Hello there!", "STR Get element error")
 }
 
@@ -211,21 +212,22 @@ func testGetElement () {
 // }
 
 func main () () {
-	intArray = [5]i32{ 1, 2, 3, 4, 5}
-	longArray = [5]i64{20L, 30L, 90L, 1L, 5L}
+	intArray = [6]i32{ 31, 32, 33, 34, 35, 36}
+	var i i32 = intArray[4]
+/*	longArray = [5]i64{20L, 30L, 90L, 1L, 5L}
 	floatArray = [5]f32{3.9, 6.7, 1.2, 5.3, 9.102}
 	doubleArray = [5]f64{5.0D, 70.0D, 8.5D, 0.289D, 99999.999D}
 	byteArray = [5]i8{70B, 1B, 123B, 0B, 127B}
 	boolArray = [5]bool{ true, false, true, true, false}
 
 	// stringArray = []str{ "foo", "Foo!", "bar?", "Bar!!", "Hello there!"}
-
-	testGetElement()
-	// testGetArray()
+*/
+	//testGetElement()
+/*	// testGetArray()
 	// testPrintElement()
 	// testPrintArray()
 	// testMakeArray()
 	// testRead()
 	// testLength()
-	// testWriteElement()
+	// testWriteElement()*/
 }

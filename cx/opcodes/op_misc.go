@@ -3,26 +3,29 @@ package opcodes
 import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+	"github.com/skycoin/cx/cx/types"
+	"fmt"
 )
+
 
 // "fmt"
 
 // EscapeAnalysis ...
 //TODO: Comment this out
 //TODO: Delete this, probably not needed
-func EscapeAnalysis(input *ast.CXValue) int32 {
+func EscapeAnalysis(input *ast.CXValue) types.Pointer {
 	heapOffset := ast.AllocateSeq(input.Arg.TotalSize + constants.OBJECT_HEADER_SIZE)
 
 	byts := input.Get_bytes()
 
 	// creating a header for this object
 	var header = make([]byte, constants.OBJECT_HEADER_SIZE)
-	ast.WriteMemI32(header, 5, int32(len(byts)))
+	types.Write_ptr(header, 5, types.Cast_int_to_ptr(len(byts))) // TODO: PTR remove hardcode 5
 
 	obj := append(header, byts...)
-	ast.WriteMemory(heapOffset, obj)
+	types.WriteSlice_byte(ast.PROGRAM.Memory, heapOffset, obj)
 
-	return int32(heapOffset)
+	return heapOffset
 }
 
 func opIdentity(inputs []ast.CXValue, outputs []ast.CXValue) {
@@ -36,13 +39,14 @@ func opIdentity(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 	//TODO: Delete
 	if elt.DoesEscape {
-		outputs[0].Set_i32(EscapeAnalysis(&inputs[0]))
+		outputs[0].Set_ptr(EscapeAnalysis(&inputs[0]))
 	} else {
 		switch elt.PassBy {
 		case constants.PASSBY_VALUE:
+			fmt.Printf("PASSBY_VALUE %v AT OFFSET %v\n", inputs[0].Get_bytes(), outputs[0].Offset)
 			outputs[0].Set_bytes(inputs[0].Get_bytes())
 		case constants.PASSBY_REFERENCE:
-			outputs[0].Set_i32(int32(inputs[0].Offset))
+			outputs[0].Set_ptr(inputs[0].Offset)
 		}
 	}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
 	"github.com/skycoin/cx/cx/globals"
+    "github.com/skycoin/cx/cx/types"
 )
 
 // FunctionHeader takes a function name ('ident') and either creates the
@@ -99,7 +100,7 @@ func CheckUndValidTypes(expr *ast.CXExpression) {
 	}
 }
 
-func FunctionProcessParameters(symbols *[]map[string]*ast.CXArgument, symbolsScope *map[string]bool, offset *int, fn *ast.CXFunction, params []*ast.CXArgument) {
+func FunctionProcessParameters(symbols *[]map[string]*ast.CXArgument, symbolsScope *map[string]bool, offset *types.Pointer, fn *ast.CXFunction, params []*ast.CXArgument) {
 	for _, param := range params {
 		ProcessLocalDeclaration(symbols, symbolsScope, param)
 
@@ -125,7 +126,7 @@ func FunctionDeclaration(fn *ast.CXFunction, inputs, outputs []*ast.CXArgument, 
 	FunctionAddParameters(fn, inputs, outputs)
 
 	// getting offset to use by statements (excluding inputs, outputs and receiver)
-	var offset int
+	var offset types.Pointer
 	//TODO: Why would the heap starting position always be incrasing?
 	//TODO: HeapStartsAt only increases, with every write?
 	//DataOffset only increases
@@ -293,7 +294,7 @@ func ProcessOperatorExpression(expr *ast.CXExpression) {
 	}
 	if expr.IsUndType() {
 		for _, out := range expr.Outputs {
-			size := 1
+			size := types.Pointer(1)
 			if !ast.IsComparisonOperator(expr.Operator.OpCode) {
 				size = ast.GetSize(ast.GetAssignmentElement(expr.Inputs[0]))
 			}
@@ -345,7 +346,7 @@ func checkIndexType(idx *ast.CXArgument) {
 // ProcessExpressionArguments performs a series of checks and processes to an expresion's inputs and outputs.
 // Some of these checks are: checking if a an input has not been declared, assign a relative offset to the argument,
 // and calculate the correct size of the argument.
-func ProcessExpressionArguments(symbols *[]map[string]*ast.CXArgument, symbolsScope *map[string]bool, offset *int, fn *ast.CXFunction, args []*ast.CXArgument, expr *ast.CXExpression, isInput bool) {
+func ProcessExpressionArguments(symbols *[]map[string]*ast.CXArgument, symbolsScope *map[string]bool, offset *types.Pointer, fn *ast.CXFunction, args []*ast.CXArgument, expr *ast.CXExpression, isInput bool) {
 	for _, arg := range args {
 		ProcessLocalDeclaration(symbols, symbolsScope, arg)
 
@@ -727,7 +728,7 @@ func lookupSymbol(pkgName, ident string, symbols *[]map[string]*ast.CXArgument) 
 }
 
 // UpdateSymbolsTable adds `sym` to the innermost scope (last element of slice) in `symbols`.
-func UpdateSymbolsTable(symbols *[]map[string]*ast.CXArgument, sym *ast.CXArgument, offset *int, shouldExist bool) {
+func UpdateSymbolsTable(symbols *[]map[string]*ast.CXArgument, sym *ast.CXArgument, offset *types.Pointer, shouldExist bool) {
 	if sym.ArgDetails.Name != "" {
 		if !sym.IsLocalDeclaration {
 			GetGlobalSymbol(symbols, sym.ArgDetails.Package, sym.ArgDetails.Name)
@@ -760,7 +761,7 @@ func UpdateSymbolsTable(symbols *[]map[string]*ast.CXArgument, sym *ast.CXArgume
 	}
 }
 
-func ProcessMethodCall(expr *ast.CXExpression, symbols *[]map[string]*ast.CXArgument, offset *int, shouldExist bool) {
+func ProcessMethodCall(expr *ast.CXExpression, symbols *[]map[string]*ast.CXArgument, offset *types.Pointer, shouldExist bool) {
 	if expr.IsMethodCall() {
 		var inp *ast.CXArgument
 		var out *ast.CXArgument
@@ -887,7 +888,7 @@ func ProcessMethodCall(expr *ast.CXExpression, symbols *[]map[string]*ast.CXArgu
 	}
 }
 
-func GiveOffset(symbols *[]map[string]*ast.CXArgument, sym *ast.CXArgument, offset *int, shouldExist bool) {
+func GiveOffset(symbols *[]map[string]*ast.CXArgument, sym *ast.CXArgument, offset *types.Pointer, shouldExist bool) {
 	if sym.ArgDetails.Name != "" {
 		if !sym.IsLocalDeclaration {
 			GetGlobalSymbol(symbols, sym.ArgDetails.Package, sym.ArgDetails.Name)
@@ -1142,7 +1143,7 @@ func ProcessSymbolFields(sym *ast.CXArgument, arg *ast.CXArgument) {
 }
 
 func SetFinalSize(symbols *[]map[string]*ast.CXArgument, sym *ast.CXArgument) {
-	var finalSize int = sym.TotalSize
+	finalSize := sym.TotalSize
 
 	arg, err := lookupSymbol(sym.ArgDetails.Package.Name, sym.ArgDetails.Name, symbols)
 	if err == nil {
@@ -1167,7 +1168,7 @@ func GetGlobalSymbol(symbols *[]map[string]*ast.CXArgument, symPkg *ast.CXPackag
 	}
 }
 
-func PreFinalSize(finalSize *int, sym *ast.CXArgument, arg *ast.CXArgument) {
+func PreFinalSize(finalSize *types.Pointer, sym *ast.CXArgument, arg *ast.CXArgument) {
 	idxCounter := 0
 	elt := ast.GetAssignmentElement(sym)
 	for _, op := range elt.DereferenceOperations {
@@ -1180,8 +1181,7 @@ func PreFinalSize(finalSize *int, sym *ast.CXArgument, arg *ast.CXArgument) {
 			idxCounter++
 		case constants.DEREF_POINTER:
 			if len(arg.DeclarationSpecifiers) > 0 {
-				var subSize int
-				subSize = 1
+				subSize := types.Pointer(1)
 				for _, decl := range arg.DeclarationSpecifiers {
 					switch decl {
 					case constants.DECL_ARRAY:

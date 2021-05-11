@@ -1,6 +1,9 @@
 package ast
 
-import "github.com/skycoin/cx/cx/constants"
+import (
+    "github.com/skycoin/cx/cx/constants"
+    "github.com/skycoin/cx/cx/types"
+)
 
 // GetAssignmentElement ...
 func GetAssignmentElement(arg *CXArgument) *CXArgument {
@@ -27,8 +30,8 @@ func GetType(arg *CXArgument) int {
 func Pointer(arg *CXArgument) *CXArgument {
 	arg.DeclarationSpecifiers = append(arg.DeclarationSpecifiers, constants.DECL_POINTER)
 	arg.IsPointer = true
-	arg.Size = constants.TYPE_POINTER_SIZE
-	arg.TotalSize = constants.TYPE_POINTER_SIZE
+	arg.Size = types.TYPE_POINTER_SIZE
+	arg.TotalSize = types.TYPE_POINTER_SIZE
 
 	return arg
 }

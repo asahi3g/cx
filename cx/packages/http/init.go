@@ -6,6 +6,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
 	"github.com/skycoin/cx/cx/opcodes"
+	"github.com/skycoin/cx/cx/types"
 )
 
 func RegisterPackage() {
@@ -30,8 +31,8 @@ func RegisterPackage() {
 	urlFld.DeclarationSpecifiers = append(urlFld.DeclarationSpecifiers, constants.DECL_STRUCT)
 	urlFld.DeclarationSpecifiers = append(urlFld.DeclarationSpecifiers, constants.DECL_POINTER)
 	urlFld.IsPointer = true
-	urlFld.Size = constants.TYPE_POINTER_SIZE
-	urlFld.TotalSize = constants.TYPE_POINTER_SIZE
+	urlFld.Size = types.TYPE_POINTER_SIZE
+	urlFld.TotalSize = types.TYPE_POINTER_SIZE
 	urlFld.CustomType = urlStrct
 	requestStrct.AddField(urlFld)
 
@@ -42,7 +43,7 @@ func RegisterPackage() {
 	headerFld.IsReference = true
 	// headerFld.IsArray = true
 	headerFld.PassBy = constants.PASSBY_REFERENCE
-	headerFld.Lengths = []int{0, 0}
+	headerFld.Lengths = []types.Pointer{0, 0}
 
 	requestStrct.AddField(headerFld)
 
@@ -67,7 +68,7 @@ func RegisterPackage() {
 	transferEncodingFld.IsReference = true
 	// transferEncodingFld.IsArray = true
 	transferEncodingFld.PassBy = constants.PASSBY_REFERENCE
-	transferEncodingFld.Lengths = []int{0}
+	transferEncodingFld.Lengths = []types.Pointer{0}
 	responseStruct.AddField(transferEncodingFld)
 	urlStrct.AddField(ast.MakeArgument("Close", "", 0).AddType(constants.TypeNames[constants.TYPE_BOOL]).AddPackage(httpPkg))
 	urlStrct.AddField(ast.MakeArgument("Uncompressed", "", 0).AddType(constants.TypeNames[constants.TYPE_BOOL]).AddPackage(httpPkg))

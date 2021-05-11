@@ -1,15 +1,17 @@
 package ast
 
 import (
-	"log"
+	//"log"
 
-	"github.com/skycoin/cx/cx/constants"
+	//"github.com/skycoin/cx/cx/constants"
+    "github.com/skycoin/cx/cx/types"
+    "fmt"
 )
 
-var ENHANCED_DEBUGING1 bool = true
+/*var ENHANCED_DEBUGING1 bool = true
 var ENHANCED_DEBUGING2 bool = true
 var ENHANCED_DEBUGING3 bool = false //needs to check for structs too
-var ENHANCED_DEBUGING4 bool = false
+var ENHANCED_DEBUGING4 bool = false*/
 
 //NEEDS COMMENT. WTF DOES THIS DO?
 //TODO:
@@ -31,8 +33,9 @@ var ENHANCED_DEBUGING4 bool = false
 */
 
 //TODO: Delete this eventually
-func GetFinalOffset(fp int, arg *CXArgument) int {
-
+func GetFinalOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
+	fmt.Printf("GET_FINAL_OFFSET\n")
+/*
 	if ENHANCED_DEBUGING3 {
 		// if !(arg.IsPointer || arg.IsSlice || arg.IsArray || arg.IsStruct) {
 		// 	panic("arg is in invalid format")
@@ -40,11 +43,12 @@ func GetFinalOffset(fp int, arg *CXArgument) int {
 		if !IsNotAtomic(arg) {
 			panic("error: arg is non-atomic type")
 		}
-	}
+	}*/
 
 	finalOffset := arg.Offset
 
 	//Todo: find way to eliminate this check
+	fmt.Printf("FINAL_OFFSET %d, PROGRAM.Stack %d\n", finalOffset, PROGRAM.StackSize)
 	if finalOffset < PROGRAM.StackSize {
 		// Then it's in the stack, not in data or heap and we need to consider the frame pointer.
 		finalOffset += fp
@@ -56,10 +60,12 @@ func GetFinalOffset(fp int, arg *CXArgument) int {
 	//Q: How can CalculateDereferences change offset?
 	//Why is finalOffset fed in as a pointer?
 	finalOffset = CalculateDereferences(arg, finalOffset, fp)
+	fmt.Printf("FINAL %v\n", finalOffset)
 	for _, fld := range arg.Fields {
 		// elt = fld
 		finalOffset += fld.Offset
 		finalOffset = CalculateDereferences(fld, finalOffset, fp)
+	fmt.Printf("FINAL %v\n", finalOffset)
 	}
 
 	return finalOffset
@@ -67,12 +73,12 @@ func GetFinalOffset(fp int, arg *CXArgument) int {
 
 //OMFG. set ENABLE_MIRACLE_BUG to true and do `make build; make test`
 //var ENABLE_MIRACLE_BUG bool = true //uses GetFinalOffset for everything
-var ENHANCED_DEBUGING bool = true //runs asserts to find error
+/*var ENHANCED_DEBUGING bool = true //runs asserts to find error
 
 var ENABLE_MIRACLE_BUG bool = false
 
 //this is simplest version of function that works for atomic types
-func GetOffsetAtomicSimple(fp int, arg *CXArgument) int {
+func GetOffsetAtomicSimple(fp types.Pointer, arg *CXArgument) types.Pointer {
 
 	if ENHANCED_DEBUGING1 {
 		if IsNotAtomic(arg) {
@@ -134,7 +140,7 @@ func IsAtomic(arg *CXArgument) bool {
 }
 
 //this is version with type assertions
-func GetOffsetAtomic(fp int, arg *CXArgument) int {
+func GetOffsetAtomic(fp types.Pointer, arg *CXArgument) types.Pointer {
 	if !ENABLE_MIRACLE_BUG {
 		return GetFinalOffset(fp, arg)
 	}
@@ -160,70 +166,70 @@ func GetOffsetAtomic(fp int, arg *CXArgument) int {
 }
 
 // GetOffset_i8 ...
-func GetOffset_i8(fp int, arg *CXArgument) int {
+func GetOffset_i8(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp,arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_i16 ...
-func GetOffset_i16(fp int, arg *CXArgument) int {
+func GetOffset_i16(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_i32 ...
-func GetOffset_i32(fp int, arg *CXArgument) int {
+func GetOffset_i32(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_i64 ...
-func GetOffset_i64(fp int, arg *CXArgument) int {
+func GetOffset_i64(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_ui8 ...
-func GetOffset_ui8(fp int, arg *CXArgument) int {
+func GetOffset_ui8(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_ui16 ...
-func GetOffset_ui16(fp int, arg *CXArgument) int {
+func GetOffset_ui16(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_ui32 ...
-func GetOffset_ui32(fp int, arg *CXArgument) int {
+func GetOffset_ui32(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_ui64 ...
-func GetOffset_ui64(fp int, arg *CXArgument) int {
+func GetOffset_ui64(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_f32 ...
-func GetOffset_f32(fp int, arg *CXArgument) int {
+func GetOffset_f32(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_f64 ...
-func GetOffset_f64(fp int, arg *CXArgument) int {
+func GetOffset_f64(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	// return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
@@ -231,19 +237,19 @@ func GetOffset_f64(fp int, arg *CXArgument) int {
 
 // GetOffset_bool ...
 //NOTE: BOOL is not ready for migration yet
-func GetOffset_bool(fp int, arg *CXArgument) int {
+func GetOffset_bool(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//return GetFinalOffset(fp, arg)
 	//return GetOffsetAtomic(fp, arg)
 	return GetOffsetAtomicSimple(fp, arg)
 }
 
 // GetOffset_str ...
-func GetOffset_str(fp int, arg *CXArgument) int {
+func GetOffset_str(fp types.Pointer, arg *CXArgument) types.Pointer {
 	return GetFinalOffset(fp, arg)
 }
 
 // GetOffset_slice ...
-func GetOffset_slice(fp int, arg *CXArgument) int {
+func GetOffset_slice(fp types.Pointer, arg *CXArgument) types.Pointer {
 	finalOffset := arg.Offset
 
 	if finalOffset < PROGRAM.StackSize {
@@ -262,7 +268,7 @@ func GetOffset_slice(fp int, arg *CXArgument) int {
 }
 
 // GetOffset_ptr ...
-func GetOffset_ptr(fp int, arg *CXArgument) int {
+func GetOffset_ptr(fp types.Pointer, arg *CXArgument) types.Pointer {
 	// defer RuntimeError(PROGRAM)
 	// var elt *CXArgument
 	finalOffset := arg.Offset
@@ -280,4 +286,4 @@ func GetOffset_ptr(fp int, arg *CXArgument) int {
 	}
 
 	return finalOffset
-}
+}*/

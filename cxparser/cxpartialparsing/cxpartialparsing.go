@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+	"github.com/skycoin/cx/cx/types"
 	"github.com/skycoin/cx/cxparser/actions"
 )
 
@@ -1757,15 +1758,15 @@ yynewstate:
 			arg := ast.MakeArgument("", actions.CurrentFile, actions.LineNo).AddType("func")
 			arg.Inputs = yyS[yypt-1].arguments
 			arg.Outputs = yyS[yypt-0].arguments
-			yyVAL.argument = actions.DeclarationSpecifiers(arg, []int{0}, constants.DECL_FUNC)
+			yyVAL.argument = actions.DeclarationSpecifiers(arg, []types.Pointer{0}, constants.DECL_FUNC)
 		}
 	case 39:
 		{
-			yyVAL.argument = actions.DeclarationSpecifiers(yyS[yypt-0].argument, []int{0}, constants.DECL_POINTER)
+			yyVAL.argument = actions.DeclarationSpecifiers(yyS[yypt-0].argument, []types.Pointer{0}, constants.DECL_POINTER)
 		}
 	case 40:
 		{
-			yyVAL.argument = actions.DeclarationSpecifiers(yyS[yypt-0].argument, []int{0}, constants.DECL_SLICE)
+			yyVAL.argument = actions.DeclarationSpecifiers(yyS[yypt-0].argument, []types.Pointer{0}, constants.DECL_SLICE)
 		}
 	case 41:
 		{
@@ -1778,12 +1779,12 @@ yynewstate:
 	case 43:
 		{
 			basic := actions.DeclarationSpecifiersBasic(yyS[yypt-0].i)
-			yyVAL.argument = actions.DeclarationSpecifiers(basic, yyS[yypt-1].ints, constants.DECL_ARRAY)
+			yyVAL.argument = actions.DeclarationSpecifiers(basic, types.Cast_sint_to_sptr(yyS[yypt-1].ints), constants.DECL_ARRAY)
 		}
 	case 44:
 		{
 			strct := actions.DeclarationSpecifiersStruct(yyS[yypt-0].tok, "", false, actions.CurrentFile, actions.LineNo)
-			yyVAL.argument = actions.DeclarationSpecifiers(strct, yyS[yypt-1].ints, constants.DECL_ARRAY)
+			yyVAL.argument = actions.DeclarationSpecifiers(strct, types.Cast_sint_to_sptr(yyS[yypt-1].ints), constants.DECL_ARRAY)
 		}
 	case 45:
 		{
