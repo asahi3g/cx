@@ -205,6 +205,10 @@ func GetSlice_byte(memory []byte, offset Pointer, size Pointer) []byte {
 	return memory[offset : offset + size]
 }
 
+func Read_str(memory []byte, offset Pointer, size Pointer) string {
+	return string(GetSlice_byte(memory, offset, size))
+}
+
 func Write_bool(memory []byte, offset Pointer, value bool) {
 	if value {
 		memory[offset] = 1
@@ -293,5 +297,9 @@ func WriteSlice_byte(memory []byte, offset Pointer, byts []byte) {
 	for c := Pointer(0); c < count; c++ {
 		memory[offset+c] = byts[c]
 	}
+}
+
+func Write_str(memory []byte, offset Pointer, value string) {
+	copy(memory[offset:], []byte(value))
 }
 

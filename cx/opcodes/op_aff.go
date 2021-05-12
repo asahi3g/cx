@@ -39,7 +39,7 @@ func GetInferActions(inp *ast.CXArgument, fp types.Pointer) []string {
 	// for c := int(l); c > 0; c-- {
 	for c := types.Cast_int_to_ptr(0); c < l; c++ {
 		// elof := Deserialize_i32(PROGRAM.Memory[int(off) + OBJECT_HEADER_SIZE + SLICE_HEADER_SIZE + (c - 1) * TYPE_POINTER_SIZE : int(off) + OBJECT_HEADER_SIZE + SLICE_HEADER_SIZE + c * STR_HEADER_SIZE])
-		elOff := types.Read_ptr(ast.PROGRAM.Memory, off+constants.OBJECT_HEADER_SIZE+constants.SLICE_HEADER_SIZE+c*types.TYPE_POINTER_SIZE,)
+		elOff := types.Read_ptr(ast.PROGRAM.Memory, off+constants.OBJECT_HEADER_SIZE+constants.SLICE_HEADER_SIZE+c*types.TYPE_POINTER_SIZE)
 		// size := Deserialize_i32(PROGRAM.Memory[elOff : elOff+STR_HEADER_SIZE])
 		// var res string
 		// _, err := encoder.DeserializeRaw(PROGRAM.Memory[elOff:elOff+STR_HEADER_SIZE+size], &res)
@@ -48,7 +48,7 @@ func GetInferActions(inp *ast.CXArgument, fp types.Pointer) []string {
 		// }
 
 		// result[int(l) - c] = res
-		result[c] = ast.ReadStringFromObject(elOff)
+		result[c] = ast.ReadStringData(elOff)
 	}
 
 	return result
@@ -102,10 +102,10 @@ func CallAffPredicate(fn *ast.CXFunction, predValue []byte) byte {
 
 	prevCall.Line--
 
-	return ast.ReadMemory(ast.GetFinalOffset(
+	return types.GetSlice_byte(ast.PROGRAM.Memory, ast.GetFinalOffset(
 		newCall.FramePointer,
 		newCall.Operator.Outputs[0]),
-		newCall.Operator.Outputs[0])[0]
+		ast.GetSize(newCall.Operator.Outputs[0]))[0]
 }
 
 // This might not make sense, as we can use normal programming to create conditions on values

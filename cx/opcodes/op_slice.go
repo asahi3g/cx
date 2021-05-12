@@ -22,7 +22,7 @@ func opLen(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 		// TODO: Had to add elt.Lengths to avoid doing this for arrays, but not entirely sure why
 	} else if elt.Type == constants.TYPE_STR && elt.Lengths == nil {
-		var strOffset = ast.GetStrOffset(inputs[0].Offset, inputs[0].Arg.ArgDetails.Name)
+		var strOffset = ast.GetStrOffset(inputs[0].Offset, inputs[0].Arg.ArgDetails.Name == "")
 		// Checking if the string lives on the heap.
 		if strOffset > ast.PROGRAM.HeapStartsAt {
 			// Then it's on the heap and we need to consider

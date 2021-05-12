@@ -73,7 +73,7 @@ func (value *CXValue) Get_bytes() []byte {
 }
 
 func (value *CXValue) Get_str() string {
-	return ReadStrFromOffset(value.Offset, value.Arg)
+	return ReadStrFromOffset(value.Offset, value.Arg.ArgDetails.Name == "")
 }
 
 func (value *CXValue) GetSlice_i8() []int8 {

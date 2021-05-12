@@ -2,7 +2,7 @@ package ast
 
 import (
 	"github.com/skycoin/cx/cx/constants"
-	//"fmt"
+	"fmt"
     "github.com/skycoin/cx/cx/types"
 )
 
@@ -29,6 +29,10 @@ func GetDerefSize(arg *CXArgument) types.Pointer {
 	return arg.Size
 }
 
+func PrintArg(name string, arg *CXArgument) {
+	fmt.Printf("%s %s, SIZE %d, SLICE %v, TYPE %s\n", name, arg.ArgDetails.Name, arg.Size, arg.IsSlice, constants.TypeNames[arg.Type])
+}
+
 func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.Pointer) types.Pointer {
 	//fmt.Printf("CALCULATE_DEREF\n")
 	var isPointer bool
@@ -53,6 +57,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 
 			//TODO: delete
 			sizeToUse := GetDerefSize(arg) //TODO: is always arg.Size unless arg.CustomType != nil
+			PrintArg("DEREF_SLICE: ", arg)
 			finalOffset += types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeToUse
 			//fmt.Printf("BASE_OFFSET %d, FINAL_OFFSET %d, SIZE_TO_USE %d\n",
 			//	baseOffset, finalOffset, sizeToUse)
@@ -81,6 +86,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			//tmpVV := types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
 			//fmt.Printf("SIZEOF_ELEMENT %d, OFFSET %d, INDEX_OFFSET %d, INDEX_VALUE %v\n",
 			//	sizeofElement, GetFinalOffset(fp, arg.Indexes[idxCounter]), tmpOO, tmpVV)
+			PrintArg("DEREF_ARRAY: ", arg)
 			finalOffset += types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
 			idxCounter++
 		case constants.DEREF_POINTER: //TODO: Move to CalculateDereference_ptr

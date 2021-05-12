@@ -2,79 +2,46 @@ package ast
 
 import (
 	"github.com/skycoin/cx/cx/constants"
-    "github.com/skycoin/cx/cx/types"
-
-
-	"github.com/skycoin/skycoin/src/cipher/encoder"
+	"github.com/skycoin/cx/cx/types"
 )
-
-func DeserializeRaw(byts []byte, offset types.Pointer, size types.Pointer, item interface{}) {
-	_, err := encoder.DeserializeRaw(byts[offset:offset+size], item)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func ReadMemory(offset types.Pointer, arg *CXArgument) []byte {
-	size := GetSize(arg)
-	return PROGRAM.Memory[offset : offset+size]
-}
 
 // ReadStr ...
 func ReadStr(fp types.Pointer, inp *CXArgument) (out string) {
 	off := GetFinalOffset(fp, inp)
-	return ReadStrFromOffset(off, inp)
+	return ReadStrFromOffset(off, inp.ArgDetails.Name == "")
+}
+
+// GetStrOffset ...
+func GetStrOffset(offset types.Pointer, isLiteral bool) types.Pointer {
+	if (offset >= AST.DataSegmentStartsAt) && (offset < (AST.DataSegmentStartsAt+AST.DataSegmentSize))
+		return offset
+	}
+	return types.Read_ptr(PROGRAM.Memory, offset)
 }
 
 // ReadStrFromOffset ...
-func ReadStrFromOffset(off types.Pointer, inp *CXArgument) (out string) {
-	var offset types.Pointer
-	if inp.ArgDetails.Name == "" {
-		// Then it's a literal.
-		offset = off
-	} else {
-		offset = types.Read_ptr(PROGRAM.Memory, off)
-	}
+func ReadStrFromOffset(offset types.Pointer, isLiteral bool) (out string) {
+	return ReadStringData(GetStrOffset(offset, isLiteral))
+}
 
+// ReadStringFromObject reads the string located at offset `off`.
+func ReadStringData(offset types.Pointer) string {
 	if offset == 0 {
 		// Then it's nil string.
-		out = ""
-		return
+		return ""
 	}
 
 	// We need to check if the string lives on the data segment or on the
 	// heap to know if we need to take into consideration the object header's size.
+	var headerOffset types.Pointer
 	if offset > PROGRAM.HeapStartsAt {
-		size := types.Read_ptr(PROGRAM.Memory, offset+constants.OBJECT_HEADER_SIZE)
-		DeserializeRaw(PROGRAM.Memory, offset+constants.OBJECT_HEADER_SIZE, constants.STR_HEADER_SIZE+size, &out)
-	} else {
-		size := types.Read_ptr(PROGRAM.Memory, offset)
-		DeserializeRaw(PROGRAM.Memory, offset, constants.STR_HEADER_SIZE+size, &out)
-	}
-
-	return out
-}
-
-// ReadStringFromObject reads the string located at offset `off`.
-func ReadStringFromObject(off types.Pointer) string {
-	var plusOff types.Pointer
-	if off > PROGRAM.HeapStartsAt {
 		// Found in heap segment.
-		plusOff += constants.OBJECT_HEADER_SIZE
+		headerOffset += constants.OBJECT_HEADER_SIZE
 	}
 
-	size := types.Read_ptr(PROGRAM.Memory, off+plusOff)
-
-	str := ""
-	DeserializeRaw(PROGRAM.Memory, off+plusOff, constants.STR_HEADER_SIZE+size, &str)
+	size := types.Read_ptr(PROGRAM.Memory, offset)
+	str := string(types.GetSlice_byte(PROGRAM.Memory, offset+headerOffset, constants.STR_HEADER_SIZE+size))
 	return str
-}
-
-
-
-// FromStr ...
-func FromStr(in string) []byte {
-	return encoder.Serialize(in)
 }
 
 // WriteObjectRef
@@ -96,21 +63,12 @@ func WriteObject(offset types.Pointer, obj []byte) {
 
 // WriteStringData writes `str` to the heap as an object and returns its absolute offset.
 func WriteStringData(str string) types.Pointer {
-	return WriteObjectData(encoder.Serialize(str))
+	return WriteObjectData([]byte(str))
 }
 
 // WriteString writes the string `str` on memory, starting at byte number `fp`.
 func WriteString(fp types.Pointer, str string, out *CXArgument) {
-	WriteObject(GetFinalOffset(fp, out), encoder.Serialize(str))
-}
-
-// GetStrOffset ...
-func GetStrOffset(offset types.Pointer, name string) types.Pointer {
-	if name != "" {
-		// then it's not a literal
-		return types.Read_ptr(PROGRAM.Memory, offset)
-	}
-	return offset
+	WriteObject(GetFinalOffset(fp, out), []byte(str))
 }
 
 // ResizeMemory ...

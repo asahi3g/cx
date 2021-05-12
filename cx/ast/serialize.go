@@ -6,6 +6,14 @@ import (
 	"github.com/skycoin/skycoin/src/cipher/encoder"
 )
 
+
+func deserializeRaw(byts []byte, offset types.Pointer, size types.Pointer, item interface{}) {
+	_, err := encoder.DeserializeRaw(byts[offset:offset+size], item)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func serializeString(name string, s *SerializedCXProgram) (int64, int64) {
 	if name == "" {
 		return int64(-1), int64(-1)
@@ -613,7 +621,7 @@ func SerializeDebugInfo(prgrm *CXProgram, includeMemory, useCompression bool) Se
 	var s SerializedCXProgram
 
 	bytes := SerializeCXProgram(prgrm, includeMemory, useCompression)
-	DeserializeRaw(bytes, 0, types.Cast_ui64_to_ptr(idxSize), &s.Index)
+	deserializeRaw(bytes, 0, types.Cast_ui64_to_ptr(idxSize), &s.Index)
 
 	data := &SerializedDataSize{
 		Program:     len(bytes[s.Index.ProgramOffset:s.Index.CallsOffset]),
@@ -637,7 +645,7 @@ func deserializeString(off int64, size int64, s *SerializedCXProgram) string {
 	}
 
 	var name string
-	DeserializeRaw(s.Strings, types.Cast_i64_to_ptr(off), types.Cast_i64_to_ptr(size), &name)
+	deserializeRaw(s.Strings, types.Cast_i64_to_ptr(off), types.Cast_i64_to_ptr(size), &name)
 
 	return name
 }
@@ -988,7 +996,7 @@ func Deserialize(b []byte, useCompression bool) (prgrm *CXProgram) {
 		UncompressBytesLZ4(&b)
 	}
 
-	DeserializeRaw(b, 0, types.Cast_int_to_ptr(len(b)), &s)
+	deserializeRaw(b, 0, types.Cast_int_to_ptr(len(b)), &s)
 	initDeserialization(prgrm, &s)
 
 	return prgrm
@@ -1001,17 +1009,17 @@ func CopyProgramState(sPrgrm1, sPrgrm2 *[]byte) {
 	var index1 serializedCXProgramIndex
 	var index2 serializedCXProgramIndex
 
-	DeserializeRaw((*sPrgrm1), 0, idxSize, &index1)
-	DeserializeRaw((*sPrgrm2), 0, idxSize, &index2)
+	deserializeRaw((*sPrgrm1), 0, idxSize, &index1)
+	deserializeRaw((*sPrgrm2), 0, idxSize, &index2)
 
 	var prgrm1Info serializedProgram
-	DeserializeRaw((*sPrgrm1),
+	deserializeRaw((*sPrgrm1),
 		types.Cast_i64_to_ptr(index1.ProgramOffset),
 		types.Cast_i64_to_ptr(index1.CallsOffset-index1.ProgramOffset),
 		 &prgrm1Info)
 
 	var prgrm2Info serializedProgram
-	DeserializeRaw((*sPrgrm2),
+	deserializeRaw((*sPrgrm2),
 		types.Cast_i64_to_ptr(index2.ProgramOffset),
 		types.Cast_i64_to_ptr(index2.CallsOffset-index2.ProgramOffset),
 		 &prgrm2Info)
@@ -1031,10 +1039,10 @@ func CopyProgramState(sPrgrm1, sPrgrm2 *[]byte) {
 func GetSerializedStackSize(sPrgrm []byte) int {
 	idxSize := types.Cast_ui64_to_ptr(encoder.Size(serializedCXProgramIndex{}))
 	var index serializedCXProgramIndex
-	DeserializeRaw(sPrgrm, 0, idxSize, &index)
+	deserializeRaw(sPrgrm, 0, idxSize, &index)
 
 	var prgrmInfo serializedProgram
-	DeserializeRaw(sPrgrm,
+	deserializeRaw(sPrgrm,
 		types.Cast_i64_to_ptr(index.ProgramOffset),
 		types.Cast_i64_to_ptr(index.CallsOffset-index.ProgramOffset),
 		&prgrmInfo)
@@ -1046,10 +1054,10 @@ func GetSerializedStackSize(sPrgrm []byte) int {
 func GetSerializedDataSize(sPrgrm []byte) int {
 	idxSize := types.Cast_ui64_to_ptr(encoder.Size(serializedCXProgramIndex{}))
 	var index serializedCXProgramIndex
-	DeserializeRaw(sPrgrm, 0, idxSize, &index)
+	deserializeRaw(sPrgrm, 0, idxSize, &index)
 
 	var prgrmInfo serializedProgram
-	DeserializeRaw(sPrgrm,
+	deserializeRaw(sPrgrm,
 		types.Cast_i64_to_ptr(index.ProgramOffset),
 		types.Cast_i64_to_ptr(index.CallsOffset-index.ProgramOffset),
 		&prgrmInfo)
