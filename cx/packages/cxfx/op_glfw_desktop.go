@@ -230,7 +230,7 @@ func getWindowName(w *glfw.Window) []byte {
 	for key, win := range windows {
 		if w == win {
 			var windowName [types.TYPE_POINTER_SIZE]byte
-			types.Write_ptr(windowName[:], 0, ast.WriteStringData(key))
+			types.Write_str(windowName[:], 0, key)
 			return windowName[:]
 		}
 	}

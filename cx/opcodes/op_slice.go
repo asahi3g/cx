@@ -13,7 +13,7 @@ func opLen(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 	var sliceLen types.Pointer
 	if elt.IsSlice || elt.Type == constants.TYPE_AFF { //TODO: FIX
-		sliceOffset := ast.GetPointerOffset(inputs[0].Offset)
+		sliceOffset := types.Read_ptr(ast.PROGRAM.Memory, inputs[0].Offset)
 		if sliceOffset > 0 {
 			sliceLen = types.Read_ptr(ast.GetSliceHeader(sliceOffset), 4) // TODO: PTR remove hardcode 4
 		} else if sliceOffset < 0 {
@@ -22,21 +22,14 @@ func opLen(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 		// TODO: Had to add elt.Lengths to avoid doing this for arrays, but not entirely sure why
 	} else if elt.Type == constants.TYPE_STR && elt.Lengths == nil {
-		var strOffset = ast.GetStrOffset(inputs[0].Offset, inputs[0].Arg.ArgDetails.Name == "")
-		// Checking if the string lives on the heap.
-		if strOffset > ast.PROGRAM.HeapStartsAt {
-			// Then it's on the heap and we need to consider
-			// the object's header.
-			strOffset += constants.OBJECT_HEADER_SIZE
-		}
-
+		strOffset := types.Read_ptr(ast.PROGRAM.Memory, inputs[0].Offset)
 		sliceLen = types.Read_ptr(ast.PROGRAM.Memory, strOffset)
 	} else {
 		sliceLen = elt.Lengths[len(elt.Indexes)]
 	}
 
 	//inputs[0].Used = int8(inputs[0].Type) // TODO: Remove hacked type check
-	outputs[0].Set_i32(types.Cast_ptr_to_i32(sliceLen))
+	outputs[0].Set_i32(types.Cast_ptr_to_i32(sliceLen)) // TODO: PTR remove hardcode i32
 }
 
 //TODO: Rename OpSliceAppend
@@ -51,20 +44,20 @@ func opSliceAppend(inputs []ast.CXValue, outputs []ast.CXValue) {
 	}
 
 	var inputSliceLen types.Pointer
-	inputSliceOffset := ast.GetPointerOffset(inputs[0].Offset)
+	inputSliceOffset := types.Read_ptr(ast.PROGRAM.Memory, inputs[0].Offset)
 	if inputSliceOffset != 0 {
 		inputSliceLen = ast.GetSliceLen(inputSliceOffset)
 	}
 
 	// Preparing slice in case more memory is needed for the new element.
-	outputSliceOffset := ast.SliceAppendResize(inputs[0].FramePointer, out0, inp0, inp1.Size)
+	outputSliceOffset := ast.SliceAppendResize(inputs[0].Frame, out0, inp0, inp1.Size)
 
 	// We need to update the address of the output and input, as the final offsets
 	// could be on the heap and they could have been moved by the GC.
 
 	if inp1.Type == constants.TYPE_STR || inp1.Type == constants.TYPE_AFF {
 		var obj [types.TYPE_POINTER_SIZE]byte
-		types.Write_ptr(obj[:], 0, ast.GetStrOffset(inputs[1].Offset, inp1.ArgDetails.Name))
+		types.Write_ptr(obj[:], 0, types.Read_ptr(ast.PROGRAM.Memory, inputs[1].Offset))
 		ast.SliceAppendWrite(outputSliceOffset, obj[:], inputSliceLen)
 	} else {
 		obj := inputs[1].Get_bytes()
@@ -80,7 +73,7 @@ func opSliceAppend(inputs []ast.CXValue, outputs []ast.CXValue) {
 //TODO: Rework
 func opResize(inputs []ast.CXValue, outputs []ast.CXValue) {
 	inp0, out0 := inputs[0].Arg, outputs[0].Arg
-	fp := inputs[0].FramePointer
+	fp := inputs[0].Frame
 
 	if inp0.Type != out0.Type || !ast.GetAssignmentElement(inp0).IsSlice || !ast.GetAssignmentElement(out0).IsSlice {
 		panic(constants.CX_RUNTIME_INVALID_ARGUMENT)
@@ -96,7 +89,7 @@ func opResize(inputs []ast.CXValue, outputs []ast.CXValue) {
 //TODO: Rework
 func opInsert(inputs []ast.CXValue, outputs []ast.CXValue) {
 	inp0, inp2, out0 := inputs[0].Arg, inputs[2].Arg, outputs[0].Arg
-	fp := inputs[0].FramePointer
+	fp := inputs[0].Frame
 
 	if inp0.Type != inp2.Type || inp0.Type != out0.Type || !ast.GetAssignmentElement(inp0).IsSlice || !ast.GetAssignmentElement(out0).IsSlice {
 		panic(constants.CX_RUNTIME_INVALID_ARGUMENT)
@@ -106,7 +99,7 @@ func opInsert(inputs []ast.CXValue, outputs []ast.CXValue) {
 	var outputSliceOffset types.Pointer
 	if inp2.Type == constants.TYPE_STR || inp2.Type == constants.TYPE_AFF {
 		var obj [types.TYPE_POINTER_SIZE]byte
-		types.Write_ptr(obj[:], 0, ast.GetStrOffset(inputs[2].Offset, inp2.ArgDetails.Name))
+		types.Write_ptr(obj[:], 0, types.Read_ptr(ast.PROGRAM.Memory, inputs[2].Offset))
 		outputSliceOffset = ast.SliceInsert(fp, out0, inp0, index, obj[:])
 	} else {
 		obj := inputs[2].Get_bytes()
@@ -122,7 +115,7 @@ func opInsert(inputs []ast.CXValue, outputs []ast.CXValue) {
 //TODO: Rework
 func opRemove(inputs []ast.CXValue, outputs []ast.CXValue) {
 	inp0, out0 := inputs[0].Arg, outputs[0].Arg
-	fp := inputs[0].FramePointer
+	fp := inputs[0].Frame
 
 	if inp0.Type != out0.Type || !ast.GetAssignmentElement(inp0).IsSlice || !ast.GetAssignmentElement(out0).IsSlice {
 		panic(constants.CX_RUNTIME_INVALID_ARGUMENT)
@@ -138,7 +131,7 @@ func opRemove(inputs []ast.CXValue, outputs []ast.CXValue) {
 func opCopy(inputs []ast.CXValue, outputs []ast.CXValue) {
 	dstInput := inputs[0].Arg
 	srcInput := inputs[1].Arg
-	fp := inputs[0].FramePointer
+	fp := inputs[0].Frame
 
 	dstOffset := ast.GetSliceOffset(fp, dstInput)
 	srcOffset := ast.GetSliceOffset(fp, srcInput)

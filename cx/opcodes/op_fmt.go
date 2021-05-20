@@ -10,10 +10,13 @@ import (
 func buildString(inputs []ast.CXValue, outputs []ast.CXValue) []byte {
 	fmtStr := inputs[0].Get_str()
 
+	fmt.Printf("BUILD_STRING\n")
+
 	var res []byte
 	var specifiersCounter int
 	var lenStr = int(len(fmtStr))
 
+	fmt.Printf("FMT LEN %d, STR `%s`\n", lenStr, fmtStr)
     for c := 0; c < len(fmtStr); c++ {
 		var nextCh byte
 		ch := fmtStr[c]
@@ -73,7 +76,7 @@ func buildString(inputs []ast.CXValue, outputs []ast.CXValue) []byte {
 					res = append(res, []byte(strconv.FormatFloat(inp.Get_f64(), 'f', 16, 64))...)
 				}
 			case 'v':
-				res = append(res, []byte(ast.GetPrintableValue(inp.FramePointer, inp.Arg))...)
+				res = append(res, []byte(ast.GetPrintableValue(inp.Frame, inp.Arg))...)
                 //inp.Used = int8(inp.Type) // TODO: Remove hacked type check
             case 'b':
                 res = append(res, []byte(strconv.FormatBool(inp.Get_bool()))...)
@@ -85,6 +88,7 @@ func buildString(inputs []ast.CXValue, outputs []ast.CXValue) []byte {
 		}
 	}
 
+fmt.Printf("SPEC_COUNTER %d, LEN_INPUTS %d\n", specifiersCounter, len(inputs)+1)
 	if specifiersCounter != len(inputs)-1 {
 		extra := "%!(EXTRA "
 		// for _, inp := range expr.ProgramInput[:specifiersCounter] {
@@ -103,9 +107,9 @@ func buildString(inputs []ast.CXValue, outputs []ast.CXValue) []byte {
 			}
 
 			if c == lInps-1 {
-				extra += fmt.Sprintf("%s=%s", typ, ast.GetPrintableValue(inp.FramePointer, elt))
+				extra += fmt.Sprintf("%s=%s", typ, ast.GetPrintableValue(inp.Frame, elt))
 			} else {
-				extra += fmt.Sprintf("%s=%s, ", typ, ast.GetPrintableValue(inp.FramePointer, elt))
+				extra += fmt.Sprintf("%s=%s, ", typ, ast.GetPrintableValue(inp.Frame, elt))
 			}
 
 		}

@@ -227,7 +227,7 @@ func getNonCollectionValue(fp types.Pointer, arg, elt *CXArgument, typ string) s
 	case "bool":
 		return fmt.Sprintf("%v", types.Read_bool(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "str":
-		return fmt.Sprintf("%v", ReadStr(fp, elt))
+		return fmt.Sprintf("%v", types.Read_str(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "i8":
 		return fmt.Sprintf("%v", types.Read_i8(PROGRAM.Memory, GetFinalOffset(fp, elt)))
 	case "i16":

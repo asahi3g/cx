@@ -43,7 +43,7 @@ func opAlLoadWav(inputs []ast.CXValue, outputs []ast.CXValue) {
 	outputs[7].Set_i64(int64(wav.Duration))
 
 	outputSlicePointer := outputs[8].Offset
-	outputSliceOffset := ast.GetPointerOffset(outputSlicePointer)
+	outputSliceOffset := types.Read_ptr(ast.PROGRAM.Memory, outputSlicePointer)
 	outputSliceOffset = ast.SliceResizeEx(outputSliceOffset, types.Cast_int_to_ptr(len(data)), 1)
 	copy(ast.GetSliceData(outputSliceOffset, 1), data)
 	outputs[8].Set_ptr(outputSliceOffset)

@@ -18,8 +18,13 @@ func assert(inputs []ast.CXValue, outputs []ast.CXValue) (same bool) {
 	var byts1, byts2 []byte
 
 	if inputs[0].Arg.Type == constants.TYPE_STR {
+		s1 := inputs[0].Get_str()
+		s2 := inputs[1].Get_str()
+
+		fmt.Printf("TESTING '%s' VS '%s'\n", s1, s2)
 		byts1 = []byte(inputs[0].Get_str())
 		byts2 = []byte(inputs[1].Get_str())
+		fmt.Printf("LEN %d, %d\n", len(byts1), len(byts2))
 	} else {
 	//	fmt.Printf("V0 %v AT OFFSET %v\n", inputs[0].Get_bytes(), inputs[0].Offset)
 	//	fmt.Printf("V1 %v AT OFFSET %v\n", inputs[1].Get_bytes(), inputs[1].Offset)

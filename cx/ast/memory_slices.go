@@ -2,15 +2,15 @@ package ast
 
 import (
 	"github.com/skycoin/cx/cx/constants"
-    "github.com/skycoin/cx/cx/types"
-    "fmt"
+	"github.com/skycoin/cx/cx/types"
+	"fmt"
 )
 
 // IsValidSliceIndex ...
 func IsValidSliceIndex(offset types.Pointer, index types.Pointer, sizeofElement types.Pointer) bool {
 	sliceLen := GetSliceLen(offset)
 	bytesLen := sliceLen * sizeofElement
-	index -= constants.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE + offset
+	index -= types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE + offset
 
 	fmt.Printf("INDEX %d BYTES_LEN %d, SIZEOF_ELEMENT %d, MOD %d\n",
 		index, bytesLen, sizeofElement, index%sizeofElement)
@@ -24,8 +24,7 @@ func IsValidSliceIndex(offset types.Pointer, index types.Pointer, sizeofElement 
 func GetSliceOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 	element := GetAssignmentElement(arg)
 	if element.IsSlice {
-		return GetPointerOffset(GetFinalOffset(fp, arg))
-		// return GetPointerOffset(GetOffset_slice(fp, arg))
+		return types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg))
 	}
 
 	return types.InvalidPointer
@@ -33,12 +32,12 @@ func GetSliceOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 
 // GetObjectHeader ...
 func GetObjectHeader(offset types.Pointer) []byte {
-	return PROGRAM.Memory[offset : offset+constants.OBJECT_HEADER_SIZE]
+	return PROGRAM.Memory[offset : offset+types.OBJECT_HEADER_SIZE]
 }
 
 // GetSliceHeader ...
 func GetSliceHeader(offset types.Pointer) []byte {
-	return PROGRAM.Memory[offset+constants.OBJECT_HEADER_SIZE : offset+constants.OBJECT_HEADER_SIZE+constants.SLICE_HEADER_SIZE]
+	return PROGRAM.Memory[offset+types.OBJECT_HEADER_SIZE : offset+types.OBJECT_HEADER_SIZE+constants.SLICE_HEADER_SIZE]
 }
 
 // GetSliceLen ...
@@ -52,7 +51,7 @@ func GetSlice(offset types.Pointer, sizeofElement types.Pointer) []byte {
 	if offset > 0 {
 		sliceLen := GetSliceLen(offset)
 		if sliceLen > 0 {
-			dataOffset := offset + constants.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE - 4 // TODO: PTR remove hardcode
+			dataOffset := offset + types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE - 4 // TODO: PTR remove hardcode
 			dataLen := 4 + sliceLen*sizeofElement // TODO: PTR remove hardcodE
 			return PROGRAM.Memory[dataOffset : dataOffset+dataLen]
 		}
@@ -86,7 +85,7 @@ func SliceResizeEx(outputSliceOffset types.Pointer, count types.Pointer, sizeofE
 		} else {
 			newCap *= 2
 		}
-		var outputObjectSize = constants.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE + newCap*sizeofElement
+		var outputObjectSize = types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE + newCap*sizeofElement
 		outputSliceOffset = AllocateSeq(outputObjectSize)
 		types.Write_ptr(GetObjectHeader(outputSliceOffset), 5, outputObjectSize) // TODO: PTR remove hardcode 5
 

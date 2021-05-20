@@ -2033,7 +2033,7 @@ yynewstate:
 		}
 	case 97:
 		{
-			yyVAL.expressions = actions.WritePrimary(constants.TYPE_STR, encoder.Serialize(yyS[yypt-0].tok), false)
+			yyVAL.expressions = actions.WritePrimary(constants.TYPE_STR, types.Make_obj([]byte(yyS[yypt-0].tok)), false)
 		}
 	case 98:
 		{

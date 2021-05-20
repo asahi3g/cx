@@ -57,7 +57,7 @@ type CXCallback struct {
 func (cb *CXCallback) init(inputs []ast.CXValue, outputs []ast.CXValue, packageName string) {
 	cb.windowName = inputs[0].Get_str()
 	var windowName [types.TYPE_POINTER_SIZE]byte
-	types.Write_ptr(windowName[:], 0, ast.WriteStringData(cb.windowName))
+	types.Write_str(windowName[:], 0, cb.windowName)
 	cb.windowNameBytes = windowName[:]
 	cb.functionName = inputs[1].Get_str()
 	cb.packageName = packageName

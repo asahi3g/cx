@@ -162,10 +162,10 @@ func RunCompiled(cxprogram *ast.CXProgram, nCalls int, args []string) error {
 					if osGbl, err := osPkg.GetGlobal(constants.OS_ARGS); err == nil {
 						for _, arg := range args {
 							argBytes := encoder.Serialize(arg)
-							argOffset := ast.AllocateSeq(types.Cast_int_to_ptr(len(argBytes)) + constants.OBJECT_HEADER_SIZE)
+							argOffset := ast.AllocateSeq(types.Cast_int_to_ptr(len(argBytes)) + types.OBJECT_HEADER_SIZE)
 
-							var header = make([]byte, constants.OBJECT_HEADER_SIZE)
-							types.Write_ptr(header, 5, types.Cast_ui64_to_ptr(encoder.Size(arg))+constants.OBJECT_HEADER_SIZE) // TODO: PTR remove hardcode 5
+							var header = make([]byte, types.OBJECT_HEADER_SIZE)
+							types.Write_ptr(header, 5, types.Cast_ui64_to_ptr(encoder.Size(arg))+types.OBJECT_HEADER_SIZE) // TODO: PTR remove hardcode 5
 							obj := append(header, argBytes...)
 
 							types.WriteSlice_byte(cxprogram.Memory, argOffset, obj)

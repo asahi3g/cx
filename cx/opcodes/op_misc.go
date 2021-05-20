@@ -14,12 +14,12 @@ import (
 //TODO: Comment this out
 //TODO: Delete this, probably not needed
 func EscapeAnalysis(input *ast.CXValue) types.Pointer {
-	heapOffset := ast.AllocateSeq(input.Arg.TotalSize + constants.OBJECT_HEADER_SIZE)
+	heapOffset := ast.AllocateSeq(input.Arg.TotalSize + types.OBJECT_HEADER_SIZE)
 
 	byts := input.Get_bytes()
 
 	// creating a header for this object
-	var header = make([]byte, constants.OBJECT_HEADER_SIZE)
+	var header = make([]byte, types.OBJECT_HEADER_SIZE)
 	types.Write_ptr(header, 5, types.Cast_int_to_ptr(len(byts))) // TODO: PTR remove hardcode 5
 
 	obj := append(header, byts...)

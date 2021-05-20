@@ -70,7 +70,7 @@ func MarkAndCompact(prgrm *CXProgram) {
                     heapOffset := types.Read_ptr(prgrm.Memory, offset)
                     if heapOffset >= prgrm.HeapStartsAt {
 						for _, fld := range ptr.CustomType.Fields {
-							MarkObjectsTree(prgrm, heapOffset+constants.OBJECT_HEADER_SIZE+fld.Offset, fld.Type, fld.DeclarationSpecifiers[1:])
+							MarkObjectsTree(prgrm, heapOffset+types.OBJECT_HEADER_SIZE+fld.Offset, fld.Type, fld.DeclarationSpecifiers[1:])
 						}
 					}
 				}
@@ -91,10 +91,10 @@ func MarkAndCompact(prgrm *CXProgram) {
 
 	// Relocation of live objects.
 	for c := prgrm.HeapStartsAt + constants.NULL_HEAP_ADDRESS_OFFSET; c < prgrm.HeapStartsAt+prgrm.HeapPointer; {
-		objSize := types.Read_ptr(prgrm.Memory, c+constants.MARK_SIZE+constants.FORWARDING_ADDRESS_SIZE)
+		objSize := types.Read_ptr(prgrm.Memory, c+types.MARK_SIZE+types.FORWARDING_ADDRESS_SIZE)
 
 		if prgrm.Memory[c] == 1 {
-			forwardingAddress := types.Read_ptr(prgrm.Memory, c+constants.MARK_SIZE)
+			forwardingAddress := types.Read_ptr(prgrm.Memory, c+types.MARK_SIZE)
 
 			// We update the pointers that are pointing to the just moved object.
 			updatePointers(prgrm, forwardingAddress, prgrm.HeapStartsAt+faddr)
@@ -172,7 +172,7 @@ func doDisplaceReferences(prgrm *CXProgram, updated *map[types.Pointer]types.Poi
 			// and check if we need to update their address.
 			sliceLen := types.Read_ptr(GetSliceHeader(heapOffset + condPlusOff), 4) // TODO: PTR remove hardcoded offsets
 
-			offsetToElements := constants.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE
+			offsetToElements := types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE
 
 			for c := types.Pointer(0); c < sliceLen; c++ {
 				cHeapOffset := types.Read_ptr(prgrm.Memory, heapOffset+condPlusOff+offsetToElements+c*types.TYPE_POINTER_SIZE)
@@ -222,7 +222,7 @@ func Mark(prgrm *CXProgram, heapOffset types.Pointer) {
 	prgrm.Memory[heapOffset] = 1
 
 	// Setting forwarding address. This address is used to know where the object used to live on the heap. With it we can know what symbols were pointing to that dead object and then update their address.
-    types.Write_ptr(prgrm.Memory, heapOffset+constants.MARK_SIZE, heapOffset)
+    types.Write_ptr(prgrm.Memory, heapOffset+types.MARK_SIZE, heapOffset)
 }
 
 // MarkObjectsTree traverses and marks a possible tree of heap objects (slices of slices, slices of pointers, etc.).
@@ -262,7 +262,7 @@ func MarkObjectsTree(prgrm *CXProgram, offset types.Pointer, baseType int, declS
 			sliceLen := types.Read_ptr(GetSliceHeader(heapOffset), 4)// TODO: PTR remove hardcode
 
 			for c := types.Pointer(0); c < sliceLen; c++ {
-				offsetToElements := constants.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE
+				offsetToElements := types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE
 				cHeapOffset := types.Read_ptr(prgrm.Memory, heapOffset+offsetToElements+c*types.TYPE_POINTER_SIZE)
 				if cHeapOffset <= prgrm.HeapStartsAt {
 					// Then it's pointing to null or data segment
@@ -308,7 +308,7 @@ func updatePointerTree(prgrm *CXProgram, atOffset types.Pointer, oldAddr, newAdd
 			// Then we need to iterate each of the slice objects
 			// and check if we need to update their address.
 			sliceLen := types.Read_ptr(GetSliceHeader(heapOffset), 4) // TODO: PTR remove hardcode
-			offsetToElements := constants.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE
+			offsetToElements := types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE
 
 			for c := types.Pointer(0); c < sliceLen; c++ {
 				cHeapOffset := types.Read_ptr(prgrm.Memory, heapOffset+offsetToElements+c*types.TYPE_POINTER_SIZE)
@@ -403,7 +403,7 @@ func updatePointers(prgrm *CXProgram, oldAddr, newAddr types.Pointer) {
 					if ptr.CustomType != nil {
 						if heapOffset >= prgrm.HeapStartsAt {
 							for _, fld := range ptr.CustomType.Fields {
-								updatePointerTree(prgrm, heapOffset+constants.OBJECT_HEADER_SIZE+fld.Offset, oldAddr, newAddr, fld.Type, fld.DeclarationSpecifiers[1:])
+								updatePointerTree(prgrm, heapOffset+types.OBJECT_HEADER_SIZE+fld.Offset, oldAddr, newAddr, fld.Type, fld.DeclarationSpecifiers[1:])
 							}
 						}
 					}

@@ -3,6 +3,7 @@ package opcodes
 import (
 	"context"
 	"github.com/skycoin/cx/cx/ast"
+	"github.com/skycoin/cx/cx/types"
 	"log"
 	"net"
 	"net/rpc"
@@ -30,7 +31,7 @@ func init() {
 
 func opTCPDial(inputs []ast.CXValue, outputs []ast.CXValue) {
 	network, address, errorstring := inputs[0].Arg, inputs[1].Arg, outputs[0].Arg
-    fp := inputs[0].FramePointer
+    fp := inputs[0].Frame
 
 	log.Println("network", network)
 	log.Println("address", address)
@@ -39,7 +40,7 @@ func opTCPDial(inputs []ast.CXValue, outputs []ast.CXValue) {
 	conn, err = net.Dial("tcp", "localhost:9000")
 
 	if err != nil {
-		ast.WriteString(fp, err.Error(), errorstring)
+		types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, errorstring), err.Error())
 	}
 
 	conn.Close()
@@ -56,7 +57,7 @@ func opTCPAccept(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 func opTCPListen(inputs []ast.CXValue, outputs []ast.CXValue) {
 	network, address, errorstring := inputs[0].Arg, inputs[1].Arg, outputs[0].Arg
-    fp := inputs[0].FramePointer
+    fp := inputs[0].Frame
 
 	log.Println("network", network)
 	log.Println("address", address)
@@ -72,6 +73,6 @@ func opTCPListen(inputs []ast.CXValue, outputs []ast.CXValue) {
 	ln.Close()
 
 	if err != nil {
-		ast.WriteString(fp, err.Error(), errorstring)
+		types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, errorstring), err.Error())
 	}
 }

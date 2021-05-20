@@ -99,7 +99,7 @@ func opAlVersion(inputs []ast.CXValue, outputs []ast.CXValue) {
 func opAlGenBuffers(inputs []ast.CXValue, outputs []ast.CXValue) {
 	buffers := al.GenBuffers(int(inputs[0].Get_i32()))
 	outputSlicePointer := outputs[0].Offset
-	outputSliceOffset := ast.GetPointerOffset(outputSlicePointer)
+	outputSliceOffset := types.Read_ptr(ast.PROGRAM.Memory, outputSlicePointer)
 	for _, b := range buffers { // REFACTOR append with copy ?
 		var obj [4]byte
 		types.Write_i32(obj[:], 0, int32(b))
@@ -119,7 +119,7 @@ func opAlBufferData(inputs []ast.CXValue, outputs []ast.CXValue) {
 func opAlGenSources(inputs []ast.CXValue, outputs []ast.CXValue) {
 	sources := al.GenSources(int(inputs[0].Get_i32()))
 	outputSlicePointer := outputs[0].Offset
-	outputSliceOffset := ast.GetPointerOffset(outputSlicePointer)
+	outputSliceOffset := types.Read_ptr(ast.PROGRAM.Memory, outputSlicePointer)
 	for _, s := range sources { // REFACTOR append with copy ?
 		var obj [4]byte
 		types.Write_i32(obj[:], 0, int32(s))

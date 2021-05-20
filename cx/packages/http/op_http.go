@@ -23,7 +23,7 @@ func opHTTPHandle(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 	//step 3  : specify the input and outout parameters of Handle function.
 	urlstring, functionnamestring := inputs[0].Arg, inputs[1].Arg
-	fp := inputs[0].FramePointer
+	fp := inputs[0].Frame
 
 	// Getting handler function.
 	handlerPkg, err := ast.PROGRAM.GetPackage(functionnamestring.ArgDetails.Package.Name)
@@ -36,7 +36,7 @@ func opHTTPHandle(inputs []ast.CXValue, outputs []ast.CXValue) {
 		panic(err)
 	}
 
-	http.HandleFunc(ast.ReadStr(fp, urlstring), func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, urlstring)), func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 
 		callFP := fp + ast.PROGRAM.CallStack[ast.PROGRAM.CallCounter].Operator.Size
@@ -63,7 +63,7 @@ func opHTTPHandle(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 		//PROGRAM.Callback(handlerFn, [][]byte{i1, i2})
 		execute.Callback(ast.PROGRAM, handlerFn, [][]byte{i1, i2})
-		fmt.Fprint(w, ast.ReadStr(callFP, handlerFn.Inputs[0]))
+		fmt.Fprint(w, types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(callFP, handlerFn.Inputs[0])))
 	})
 }
 
@@ -110,17 +110,17 @@ func opHTTPNewRequest(inputs []ast.CXValue, outputs []ast.CXValue) {
 	// Seems more a prototype.
 	stringmethod, stringurl, stringbody, errorstring := inputs[0].Arg, inputs[1].Arg, inputs[2].Arg, outputs[0].Arg
 
-	fp := inputs[0].FramePointer
+	fp := inputs[0].Frame
 
 	//this is an alternative for following 3 lines of code that fail due to URL
-	method := ast.ReadStr(fp, stringmethod)
-	urlString := ast.ReadStr(fp, stringurl)
-	body := ast.ReadStr(fp, stringbody)
+	method := types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, stringmethod))
+	urlString := types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, stringurl))
+	body := types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, stringbody))
 
 	//above is an alternative for following 3 lines of code that fail due to URL
 	req, err := http.NewRequest(method, urlString, bytes.NewBuffer([]byte(body)))
 	if err != nil {
-		ast.WriteString(fp, err.Error(), errorstring)
+		types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, errorstring), err.Error())
 	}
 
 	var netClient = &http.Client{
@@ -128,7 +128,7 @@ func opHTTPNewRequest(inputs []ast.CXValue, outputs []ast.CXValue) {
 	}
 	resp, err := netClient.Do(req)
 	if err != nil {
-		ast.WriteString(fp, err.Error(), errorstring)
+		types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, errorstring), err.Error())
 	}
 	resp1 := *resp // dereference to exclude pointer issue
 
@@ -143,7 +143,7 @@ func opHTTPNewRequest(inputs []ast.CXValue, outputs []ast.CXValue) {
 	// TODO: Used `Response.Status` for now, to avoid getting an error.
 	// This will be rewritten as the whole operator is unfinished.
 	byts := encoder.Serialize(resp1.Status)
-	ast.WriteObject(out1Offset, byts)
+	types.Write_obj(ast.PROGRAM.Memory, out1Offset, byts)
 }
 
 func writeHTTPRequest(fp types.Pointer, param *ast.CXArgument, request *http.Request) {
@@ -212,37 +212,35 @@ func writeHTTPRequest(fp types.Pointer, param *ast.CXArgument, request *http.Req
 	}
 
 	// Creating empty `http.Request` object on heap.
-	reqOff := ast.WriteObjectData(make([]byte, requestType.Size))
-	types.Write_ptr(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req), reqOff)
+	types.AllocWrite_obj_data(ast.PROGRAM.Memory, make([]byte, requestType.Size))
 
 	req.DereferenceOperations = append(req.DereferenceOperations, constants.DEREF_POINTER)
 
 	// Creating empty `http.URL` object on heap.
 	req.Fields = []*ast.CXArgument{urlFld}
-	urlOff := ast.WriteObjectData(make([]byte, urlType.Size))
-	types.Write_ptr(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req), urlOff)
+	types.AllocWrite_obj_data(ast.PROGRAM.Memory, make([]byte, urlType.Size))
 
 	req.Fields = []*ast.CXArgument{methodFld}
-	ast.WriteString(fp, request.Method, &req)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req), request.Method)
 
 	req.Fields = []*ast.CXArgument{bodyFld}
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		panic(err)
 	}
-	ast.WriteString(fp, string(body), &req)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req), string(body))
 	req.Fields = []*ast.CXArgument{&derefURLFld, schemeFld}
 
-	ast.WriteString(fp, request.URL.Scheme, &req)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req), request.URL.Scheme)
 	req.Fields = []*ast.CXArgument{&derefURLFld, hostFld}
 
-	ast.WriteString(fp, request.URL.Host, &req)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req), request.URL.Host)
 	req.Fields = []*ast.CXArgument{&derefURLFld, pathFld}
 
-	ast.WriteString(fp, request.URL.Path, &req)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req), request.URL.Path)
 	req.Fields = []*ast.CXArgument{&derefURLFld, rawPathFld}
 
-	ast.WriteString(fp, request.URL.RawPath, &req)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req), request.URL.RawPath)
 	req.Fields = []*ast.CXArgument{&derefURLFld, forceQueryFld}
 
 	types.Write_bool(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req),request.URL.ForceQuery)
@@ -251,7 +249,7 @@ func writeHTTPRequest(fp types.Pointer, param *ast.CXArgument, request *http.Req
 func opHTTPDo(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 	reqstruct, respstruct, errorstring := inputs[0].Arg, outputs[0].Arg, outputs[1].Arg
-	fp := inputs[0].FramePointer
+	fp := inputs[0].Frame
 
 	//TODO read req from the inputs
 	// reqByts := ReadMemory(GetFinalOffset(fp, inp1), inp1)
@@ -319,19 +317,19 @@ func opHTTPDo(inputs []ast.CXValue, outputs []ast.CXValue) {
 	request.URL = &url
 
 	req.Fields = []*ast.CXArgument{methodFld}
-	request.Method = ast.ReadStr(fp, &req)
+	request.Method = types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req))
 
 	req.Fields = []*ast.CXArgument{&derefURLFld, schemeFld}
-	url.Scheme = ast.ReadStr(fp, &req)
+	url.Scheme = types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req))
 
 	req.Fields = []*ast.CXArgument{&derefURLFld, hostFld}
-	url.Host = ast.ReadStr(fp, &req)
+	url.Host = types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req))
 
 	req.Fields = []*ast.CXArgument{&derefURLFld, pathFld}
-	url.Path = ast.ReadStr(fp, &req)
+	url.Path = types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req))
 
 	req.Fields = []*ast.CXArgument{&derefURLFld, rawPathFld}
-	url.RawPath = ast.ReadStr(fp, &req)
+	url.RawPath = types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req))
 
 	req.Fields = []*ast.CXArgument{&derefURLFld, forceQueryFld}
 	url.ForceQuery = types.Read_bool(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &req))
@@ -341,7 +339,7 @@ func opHTTPDo(inputs []ast.CXValue, outputs []ast.CXValue) {
 	}
 	response, err := netClient.Do(&request)
 	if err != nil {
-		ast.WriteString(fp, err.Error(), errorstring)
+		types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, errorstring), err.Error())
 		return
 	}
 
@@ -387,13 +385,13 @@ func opHTTPDo(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 
 	resp.Fields = []*ast.CXArgument{statusFld}
-	ast.WriteString(fp, response.Status, &resp)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &resp), response.Status)
 
 	resp.Fields = []*ast.CXArgument{statusCodeFld}
 	types.Write_i32(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &resp), int32(response.StatusCode))
 
 	resp.Fields = []*ast.CXArgument{protoFld}
-	ast.WriteString(fp, response.Proto, &resp)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &resp), response.Proto)
 
 	resp.Fields = []*ast.CXArgument{protoMajorFld}
 	types.Write_i32(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &resp), int32(response.ProtoMajor))
@@ -409,13 +407,13 @@ func opHTTPDo(inputs []ast.CXValue, outputs []ast.CXValue) {
 	if err != nil {
 		panic(err)
 	}
-	ast.WriteString(fp, string(body), &resp)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(fp, &resp), string(body))
 }
 
 /*
 func opDMSGDo(inputs []ast.CXValue, outputs []ast.CXValue) {
 	inp1, out1 := inputs[0].Arg, outputs[0].Arg
-    fp := inputs[0].FramePointer
+    fp := inputs[0].Frame
 
     var req http.Request
 	byts1 := ast.ReadMemory(ast.GetFinalOffset(fp, inp1), inp1)

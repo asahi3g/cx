@@ -5,6 +5,7 @@ package regexp
 import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
+	"github.com/skycoin/cx/cx/types"
 	"regexp"
 
 	"github.com/jinzhu/copier"
@@ -53,7 +54,7 @@ func regexpCompile(inputs []ast.CXValue, outputs []ast.CXValue) error {
 	// internally.
 	accessExp := []*ast.CXArgument{expFld}
 	reg.Fields = accessExp
-	ast.WriteString(outputs[0].FramePointer, exp, &reg)
+	types.Write_str(ast.PROGRAM.Memory, ast.GetFinalOffset(outputs[0].Frame, &reg), exp)
     //outputs[0].Used = int8(outputs[0].Type) // TODO: Remove hacked type check
 	// Storing `Regexp` instance.
 	regexps[exp], err = regexp.Compile(exp)
@@ -116,7 +117,7 @@ func opRegexpFind(inputs []ast.CXValue, outputs []ast.CXValue) {
 	// Getting corresponding `Regexp` instance.
 	accessExp := []*ast.CXArgument{expFld}
 	reg.Fields = accessExp
-	exp := ast.ReadStr(inputs[0].FramePointer, &reg)
+	exp := types.Read_str(ast.PROGRAM.Memory, ast.GetFinalOffset(inputs[0].Frame, &reg))
 	r := regexps[exp]
 
     //inputs[0].Used = int8(inputs[0].Type) // TODO: Remove hacked type check.

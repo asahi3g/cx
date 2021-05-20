@@ -497,7 +497,7 @@ func (cxprogram *CXProgram) PrintAllObjects() {
 
 				// }
 
-				byts = cxprogram.Memory[heapOffset+constants.OBJECT_HEADER_SIZE : heapOffset+constants.OBJECT_HEADER_SIZE+ptr.CustomType.Size]
+				byts = cxprogram.Memory[heapOffset+types.OBJECT_HEADER_SIZE : heapOffset+types.OBJECT_HEADER_SIZE+ptr.CustomType.Size]
 			}
 
 			// var currLengths []int

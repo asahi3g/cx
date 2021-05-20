@@ -105,9 +105,9 @@ func (call *CXCall) Ccall(prgrm *CXProgram, globalInputs *[]CXValue, globalOutpu
 				//value.Used = -1
 				value.Offset = offset
 				value.Type = input.Type
-				value.FramePointer = fp
+				//value.FramePointer = fp
 				value.Expr = expr
-				value.memory = PROGRAM.Memory[offset : offset+GetSize(input)]
+				//value.Size = GetSize(input)
 				argIndex++
 			}
 
@@ -119,8 +119,9 @@ func (call *CXCall) Ccall(prgrm *CXProgram, globalInputs *[]CXValue, globalOutpu
 				//value.Used = -1
 				value.Offset = offset
 				value.Type = output.Type
-				value.FramePointer = fp
+				//value.FramePointer = fp
 				value.Expr = expr
+				//value.Size = 0
 				argIndex++
 			}
 
@@ -202,7 +203,7 @@ func (call *CXCall) Ccall(prgrm *CXProgram, globalInputs *[]CXValue, globalOutpu
 					// or a field of a struct (&struct.fld) we no longer need to add
 					// the OBJECT_HEADER_SIZE to the offset
 					if inp.IsInnerReference {
-						finalOffset -= constants.OBJECT_HEADER_SIZE
+						finalOffset -= types.OBJECT_HEADER_SIZE
 					}
 					var finalOffsetB [types.TYPE_POINTER_SIZE]byte
 					types.Write_ptr(finalOffsetB[:], 0, finalOffset)

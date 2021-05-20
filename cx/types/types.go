@@ -4,6 +4,16 @@ import (
 	"math"
 )
 
+
+const MARK_SIZE = Pointer(1)
+const FORWARDING_ADDRESS_SIZE = TYPE_POINTER_SIZE
+const OBJECT_GC_HEADER_SIZE = MARK_SIZE + FORWARDING_ADDRESS_SIZE
+const OBJECT_SIZE = TYPE_POINTER_SIZE
+const OBJECT_HEADER_SIZE = OBJECT_GC_HEADER_SIZE + OBJECT_SIZE
+
+type AllocatorHandler func (Pointer) Pointer
+var Allocator AllocatorHandler
+
 func panicIf(condition bool, message string) {
 	if condition {
 		panic(message)
@@ -205,10 +215,6 @@ func GetSlice_byte(memory []byte, offset Pointer, size Pointer) []byte {
 	return memory[offset : offset + size]
 }
 
-func Read_str(memory []byte, offset Pointer, size Pointer) string {
-	return string(GetSlice_byte(memory, offset, size))
-}
-
 func Write_bool(memory []byte, offset Pointer, value bool) {
 	if value {
 		memory[offset] = 1
@@ -298,8 +304,3 @@ func WriteSlice_byte(memory []byte, offset Pointer, byts []byte) {
 		memory[offset+c] = byts[c]
 	}
 }
-
-func Write_str(memory []byte, offset Pointer, value string) {
-	copy(memory[offset:], []byte(value))
-}
-

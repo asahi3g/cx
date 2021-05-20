@@ -435,11 +435,11 @@ func opGlGIFFrameToTexture(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 func opGlAppend(inputs []ast.CXValue, outputs []ast.CXValue) {
 	outputSlicePointer := outputs[0].Offset
-	outputSliceOffset := ast.GetPointerOffset(outputSlicePointer)
+	outputSliceOffset := types.Read_ptr(ast.PROGRAM.Memory, outputSlicePointer)
 
     //inputs[0].Used = int8(inputs[0].Type)
 
-    inputSliceOffset := ast.GetSliceOffset(inputs[0].FramePointer, inputs[0].Arg)
+    inputSliceOffset := ast.GetSliceOffset(inputs[0].Frame, inputs[0].Arg)
 	var inputSliceLen types.Pointer
 	if inputSliceOffset != 0 {
 		inputSliceLen = ast.GetSliceLen(inputSliceOffset)

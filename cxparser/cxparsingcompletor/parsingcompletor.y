@@ -700,7 +700,7 @@ primary_expression:
                 }
         |       STRING_LITERAL
                 {
-			$$ = actions.WritePrimary(constants.TYPE_STR, encoder.Serialize($1), false)
+			$$ = actions.WritePrimary(constants.TYPE_STR, types.Make_obj([]byte($1)), false)
                 }
         |       BOOLEAN_LITERAL
                 {

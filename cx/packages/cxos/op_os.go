@@ -421,7 +421,7 @@ func getSlice(inputs []ast.CXValue, outputs []ast.CXValue) (outputSlicePointer t
 	count = inputs[2].Get_ptr()
 	outputSlicePointer = outputs[0].Offset
 	sizeofElement = ast.GetAssignmentElement(inp1).Size
-	outputSliceOffset = ast.SliceResize(outputs[0].FramePointer, out0, inp1, count, sizeofElement)
+	outputSliceOffset = ast.SliceResize(outputs[0].Frame, out0, inp1, count, sizeofElement)
 	return
 }
 

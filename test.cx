@@ -3,8 +3,15 @@ package main
 type Soo struct {
     ii []i32
 }
+func foo(s str) {
+    printf("%s\n", s)
+}
+
 func main()() {
-    printf("WHF\n")
+foo("")
+//foo("BBB")
+//test(sprintf("%s", "AAA"), "AAA", "")
+//    printf("WHF\n")
    /*var array [4]i32 = [4]i32{11, 12, 13, 14}
     printf("WHF-------------\n")
 

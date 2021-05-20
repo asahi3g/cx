@@ -5,71 +5,7 @@ import (
 	"github.com/skycoin/cx/cx/types"
 )
 
-// ReadStr ...
-func ReadStr(fp types.Pointer, inp *CXArgument) (out string) {
-	off := GetFinalOffset(fp, inp)
-	return ReadStrFromOffset(off, inp.ArgDetails.Name == "")
-}
 
-// GetStrOffset ...
-func GetStrOffset(offset types.Pointer, isLiteral bool) types.Pointer {
-	if (offset >= AST.DataSegmentStartsAt) && (offset < (AST.DataSegmentStartsAt+AST.DataSegmentSize))
-		return offset
-	}
-	return types.Read_ptr(PROGRAM.Memory, offset)
-}
-
-// ReadStrFromOffset ...
-func ReadStrFromOffset(offset types.Pointer, isLiteral bool) (out string) {
-	return ReadStringData(GetStrOffset(offset, isLiteral))
-}
-
-// ReadStringFromObject reads the string located at offset `off`.
-func ReadStringData(offset types.Pointer) string {
-	if offset == 0 {
-		// Then it's nil string.
-		return ""
-	}
-
-	// We need to check if the string lives on the data segment or on the
-	// heap to know if we need to take into consideration the object header's size.
-	var headerOffset types.Pointer
-	if offset > PROGRAM.HeapStartsAt {
-		// Found in heap segment.
-		headerOffset += constants.OBJECT_HEADER_SIZE
-	}
-
-	size := types.Read_ptr(PROGRAM.Memory, offset)
-	str := string(types.GetSlice_byte(PROGRAM.Memory, offset+headerOffset, constants.STR_HEADER_SIZE+size))
-	return str
-}
-
-// WriteObjectRef
-// WARNING, is using heap variables?
-//Is this "Write object ot heap?"
-func WriteObjectData(obj []byte) types.Pointer {
-	size := types.Cast_int_to_ptr(len(obj)) + constants.OBJECT_HEADER_SIZE
-	heapOffset := AllocateSeq(size)
-	types.Write_ptr(PROGRAM.Memory, heapOffset, size)
-	types.WriteSlice_byte(PROGRAM.Memory, heapOffset+constants.OBJECT_HEADER_SIZE, obj)
-	return heapOffset
-}
-
-// WriteObject ...
-func WriteObject(offset types.Pointer, obj []byte) {
-	heapOffset := WriteObjectData(obj)
-	types.Write_ptr(PROGRAM.Memory, offset, heapOffset)
-}
-
-// WriteStringData writes `str` to the heap as an object and returns its absolute offset.
-func WriteStringData(str string) types.Pointer {
-	return WriteObjectData([]byte(str))
-}
-
-// WriteString writes the string `str` on memory, starting at byte number `fp`.
-func WriteString(fp types.Pointer, str string, out *CXArgument) {
-	WriteObject(GetFinalOffset(fp, out), []byte(str))
-}
 
 // ResizeMemory ...
 func ResizeMemory(prgrm *CXProgram, newMemSize types.Pointer, isExpand bool) {
@@ -152,3 +88,5 @@ func AllocateSeq(size types.Pointer) (offset types.Pointer) {
 	// consideration only heap offsets.
 	return addr + PROGRAM.HeapStartsAt
 }
+
+
