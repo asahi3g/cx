@@ -1,5 +1,24 @@
+// https://github.com/skycoin/cx/issues/53
+
 package main
 
+type Too struct {
+	a i32
+	sb []i8
+	b i32
+}
+
+func getAddr(addr *i32) (out i32) {
+	out = str.i32(sprintf("%v", addr))
+}
+
+func testAddr(addr *i32, taddr i32, message str) () {
+	var iaddr i32 = getAddr(addr)
+    printf("IADDR %d, TADDR %d\n", iaddr, taddr)
+	test(iaddr, taddr, message)
+}
+
 func main()() {
-    test(10B/10B, 1B, "FUCK")
+	var t Too // 12
+	testAddr(&t.b, 8, "main : &t.b")
 }
