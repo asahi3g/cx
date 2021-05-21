@@ -17,6 +17,9 @@ func AssertFailed() bool {
 func assert(inputs []ast.CXValue, outputs []ast.CXValue) (same bool) {
 	var byts1, byts2 []byte
 
+	fmt.Printf("BYTES1 %d\n", inputs[0].Offset)
+	fmt.Printf("BYTES2 %d\n", inputs[1].Offset)
+
 	if inputs[0].Arg.Type == constants.TYPE_STR {
 		//s1 := inputs[0].Get_str()
 		//s2 := inputs[1].Get_str()
