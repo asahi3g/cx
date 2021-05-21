@@ -19,13 +19,15 @@ func PrintArg(name string, arg *CXArgument) {
 }
 
 //TODO: Delete this eventually
+var BEFORE_COUNT int
 func GetFinalOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 	finalOffset := arg.Offset
 
 	//Todo: find way to eliminate this check
-	fmt.Printf("FINAL_OFFSET %d, PROGRAM.Stack %d\n", finalOffset, PROGRAM.StackSize)
+	types.FMTDEBUG(fmt.Sprintf("FINAL_OFFSET %d, PROGRAM.Stack %d\n", finalOffset, PROGRAM.StackSize))
 	if finalOffset < PROGRAM.StackSize {
 		// Then it's in the stack, not in data or heap and we need to consider the frame pointer.
+//		fmt.Printf("ADDING FPFP %d + %d = %d\n", finalOffset, fp, finalOffset + fp)
 		finalOffset += fp
 	}
 
@@ -34,13 +36,22 @@ func GetFinalOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//TODO: Eliminate this loop
 	//Q: How can CalculateDereferences change offset?
 	//Why is finalOffset fed in as a pointer?
+
+	types.FMTDEBUG(fmt.Sprintf("BEFORECALCULATE %d\n",finalOffset))
+/*	if finalOffset == 0 {
+		BEFORE_COUNT++
+		if BEFORE_COUNT == 2 {
+			panic("FUCK")
+		}
+	}*/
 	finalOffset = CalculateDereferences(arg, finalOffset, fp)
-	fmt.Printf("FIELD COUNT %d, FINAL %v\n", len(arg.Fields), finalOffset)
+	types.FMTDEBUG(fmt.Sprintf("FIELD COUNT %d, FINAL %v\n", len(arg.Fields), finalOffset))
 	for _, fld := range arg.Fields {
 		// elt = fld
+		types.FMTDEBUG(fmt.Sprintf("FINAL %d, FIELD %d\n", finalOffset, fld.Offset))
 		finalOffset += fld.Offset
 		finalOffset = CalculateDereferences(fld, finalOffset, fp)
-		fmt.Printf("FINAL %v\n", finalOffset)
+		types.FMTDEBUG(fmt.Sprintf("FINAL %v\n", finalOffset))
 	}
 
 	return finalOffset
@@ -51,13 +62,13 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 	//var isPointer bool
 	var baseOffset types.Pointer
 	var sizeofElement types.Pointer
-	fmt.Printf("CALCULATE_DEREFERENCES %d, %d, %s\n", finalOffset, fp, arg.ArgDetails.Name)
-	fmt.Printf("DEREF_COUNT %d\n", len(arg.DereferenceOperations))
+	types.FMTDEBUG(fmt.Sprintf("CALCULATE_DEREFERENCES %d, %d, %s\n", finalOffset, fp, arg.ArgDetails.Name))
+	types.FMTDEBUG(fmt.Sprintf("DEREF_COUNT %d\n", len(arg.DereferenceOperations)))
 	idxCounter := 0
 	for _, op := range arg.DereferenceOperations {
 		switch op {
 		case constants.DEREF_SLICE: //TODO: Move to CalculateDereference_slice
-			fmt.Printf("DEREF_SLICE\n")
+			types.FMTDEBUG(fmt.Sprintf("DEREF_SLICE\n"))
 			if len(arg.Indexes) == 0 {
 				continue
 			}
@@ -82,7 +93,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			idxCounter++
 
 		case constants.DEREF_ARRAY: //TODO: Move to CalculateDereference_array
-			fmt.Printf("DEREF_ARRAY\n")
+			types.FMTDEBUG(fmt.Sprintf("DEREF_ARRAY\n"))
 			if len(arg.Indexes) == 0 {
 				continue
 			}
@@ -104,7 +115,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			finalOffset += types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
 			idxCounter++
 		case constants.DEREF_POINTER: //TODO: Move to CalculateDereference_ptr
-			fmt.Printf("DEREF_POINTER\n")
+			types.FMTDEBUG(fmt.Sprintf("DEREF_POINTER\n"))
 			//isPointer = true
 			finalOffset = types.Read_ptr(PROGRAM.Memory, finalOffset)
 		}

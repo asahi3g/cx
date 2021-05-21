@@ -105,7 +105,7 @@ func (call *CXCall) Ccall(prgrm *CXProgram, globalInputs *[]CXValue, globalOutpu
 				//value.Used = -1
 				value.Offset = offset
 				value.Type = input.Type
-				//value.FramePointer = fp
+				value.Frame = fp
 				value.Expr = expr
 				//value.Size = GetSize(input)
 				argIndex++
@@ -119,7 +119,7 @@ func (call *CXCall) Ccall(prgrm *CXProgram, globalInputs *[]CXValue, globalOutpu
 				//value.Used = -1
 				value.Offset = offset
 				value.Type = output.Type
-				//value.FramePointer = fp
+				value.Frame = fp
 				value.Expr = expr
 				//value.Size = 0
 				argIndex++

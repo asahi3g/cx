@@ -28,13 +28,13 @@ func ToCall(cxprogram *ast.CXProgram) *ast.CXExpression {
 }
 
 func RunCxAst(cxprogram *ast.CXProgram, untilEnd bool, nCalls *int, untilCall types.Pointer) error {
-	fmt.Printf("RUN_CX_AST\n")
+	types.FMTDEBUG("RUN_CX_AST\n")
 	defer ast.RuntimeError()
 	var err error
 
 	var inputs []ast.CXValue
 	var outputs []ast.CXValue
-	fmt.Printf("CALL_COUNTER %d, UNTIL_CALL %d\n", cxprogram.CallCounter, untilCall)
+	types.FMTDEBUG(fmt.Sprintf("CALL_COUNTER %d, UNTIL_CALL %d\n", cxprogram.CallCounter, untilCall))
 	for !cxprogram.Terminated && (untilEnd || *nCalls != 0) && cxprogram.CallCounter < untilCall {
 		call := &cxprogram.CallStack[cxprogram.CallCounter]
 
@@ -98,7 +98,7 @@ func RunCxAst(cxprogram *ast.CXProgram, untilEnd bool, nCalls *int, untilCall ty
 
 // RunCompiled ...
 func RunCompiled(cxprogram *ast.CXProgram, nCalls int, args []string) error {
-	fmt.Printf("RUN_COMPILED\n")
+	types.FMTDEBUG("RUN_COMPILED\n")
 	_, err := cxprogram.SetCurrentCxProgram()
 	if err != nil {
 		panic(err)

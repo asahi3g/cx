@@ -17,7 +17,7 @@ func panicIf(condition bool, message string) {
 }
 
 func FMTDEBUG(message string) {
-	//fmt.Printf(message)
+	fmt.Printf(message)
 }
 
 func (pointer Pointer) IsValid() bool {

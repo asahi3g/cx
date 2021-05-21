@@ -73,7 +73,6 @@ func opAssertValue(inputs []ast.CXValue, outputs []ast.CXValue) {
 }
 
 func opTest(inputs []ast.CXValue, outputs []ast.CXValue) {
-	fmt.Printf("OP_TEST\n")
 	assert(inputs, outputs)
 }
 

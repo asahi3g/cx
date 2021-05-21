@@ -35,6 +35,7 @@ func buildString(inputs []ast.CXValue, outputs []ast.CXValue) []byte {
 				continue
 			}
 		}
+		
 		if ch == '%' {
 			if specifiersCounter+1 == len(inputs) {
 				res = append(res, []byte(fmt.Sprintf("%%!%c(MISSING)", nextCh))...)

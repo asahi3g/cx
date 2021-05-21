@@ -219,6 +219,7 @@ func SignatureStringOfFunction(pkg *CXPackage, f *CXFunction) string {
 		f.Name, ins.String(), outs.String())
 }
 
+
 func getNonCollectionValue(fp types.Pointer, arg, elt *CXArgument, typ string) string {
 	if arg.IsPointer {
 		return fmt.Sprintf("%v", types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, elt)))
