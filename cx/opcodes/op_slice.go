@@ -22,8 +22,7 @@ func opLen(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 		// TODO: Had to add elt.Lengths to avoid doing this for arrays, but not entirely sure why
 	} else if elt.Type == constants.TYPE_STR && elt.Lengths == nil {
-		strOffset := types.Read_ptr(ast.PROGRAM.Memory, inputs[0].Offset)
-		sliceLen = types.Read_ptr(ast.PROGRAM.Memory, strOffset)
+		sliceLen = types.Read_str_size(ast.PROGRAM.Memory, inputs[0].Offset)
 	} else {
 		sliceLen = elt.Lengths[len(elt.Indexes)]
 	}

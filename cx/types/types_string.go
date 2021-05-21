@@ -29,3 +29,7 @@ func Read_str(memory []byte, offset Pointer) string {
 	FMTDEBUG(fmt.Sprintf("READ_STR OFFSET %d STR `%s`\n", offset, str))
 	return str
 }
+
+func Read_str_size(memory []byte, offset Pointer) Pointer {
+	return Read_obj_size(memory, offset)
+}
