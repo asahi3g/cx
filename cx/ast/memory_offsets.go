@@ -27,7 +27,7 @@ func GetFinalOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 	types.FMTDEBUG(fmt.Sprintf("NAME %s, FINAL_OFFSET %d, PROGRAM.Stack %d, ARG_OFF %d\n", arg.ArgDetails.Name, finalOffset, PROGRAM.StackSize, arg.Offset))
 	if finalOffset < PROGRAM.StackSize {
 		// Then it's in the stack, not in data or heap and we need to consider the frame pointer.
-//		fmt.Printf("ADDING FPFP %d + %d = %d\n", finalOffset, fp, finalOffset + fp)
+		fmt.Printf("ADDING FPFP %d + %d = %d\n", finalOffset, fp, finalOffset + fp)
 		finalOffset += fp
 	}
 
