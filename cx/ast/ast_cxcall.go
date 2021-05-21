@@ -3,6 +3,7 @@ package ast
 import (
 	"github.com/skycoin/cx/cx/constants"
     "github.com/skycoin/cx/cx/types"
+    "fmt"
 )
 
 // CXCall ...
@@ -199,11 +200,15 @@ func (call *CXCall) Ccall(prgrm *CXProgram, globalInputs *[]CXValue, globalOutpu
 				// 	finalOffset = GetFinalOffset(&prgrm.Stacks[0], fp, inp)
 				// }
 				if inp.PassBy == constants.PASSBY_REFERENCE {
+					fmt.Printf("PASS_BY_REFERENCE")
 					// If we're referencing an inner element, like an element of a slice (&slc[0])
 					// or a field of a struct (&struct.fld) we no longer need to add
 					// the OBJECT_HEADER_SIZE to the offset
 					if inp.IsInnerReference {
+						fmt.Printf("------------> PASS_BY_REF %d, %d, %d\n", finalOffset, types.OBJECT_HEADER_SIZE, finalOffset - types.OBJECT_HEADER_SIZE)
 						finalOffset -= types.OBJECT_HEADER_SIZE
+					} else {
+						fmt.Printf("NOT_INER_REF")
 					}
 					var finalOffsetB [types.TYPE_POINTER_SIZE]byte
 					types.Write_ptr(finalOffsetB[:], 0, finalOffset)
@@ -211,6 +216,7 @@ func (call *CXCall) Ccall(prgrm *CXProgram, globalInputs *[]CXValue, globalOutpu
 				} else {
 					size := GetSize(inp)
 					byts = prgrm.Memory[finalOffset : finalOffset+size]
+					fmt.Printf("PASS_BY_VALUE %v\n", byts)
 				}
 
 				// writing inputs to new stack frame
