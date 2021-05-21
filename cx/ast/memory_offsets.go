@@ -23,7 +23,7 @@ func GetFinalOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 	finalOffset := arg.Offset
 
 	//Todo: find way to eliminate this check
-//	fmt.Printf("FINAL_OFFSET %d, PROGRAM.Stack %d\n", finalOffset, PROGRAM.StackSize)
+	fmt.Printf("FINAL_OFFSET %d, PROGRAM.Stack %d\n", finalOffset, PROGRAM.StackSize)
 	if finalOffset < PROGRAM.StackSize {
 		// Then it's in the stack, not in data or heap and we need to consider the frame pointer.
 		finalOffset += fp
@@ -35,12 +35,12 @@ func GetFinalOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 	//Q: How can CalculateDereferences change offset?
 	//Why is finalOffset fed in as a pointer?
 	finalOffset = CalculateDereferences(arg, finalOffset, fp)
-//	fmt.Printf("FINAL %v\n", finalOffset)
+	fmt.Printf("FIELD COUNT %d, FINAL %v\n", len(arg.Fields), finalOffset)
 	for _, fld := range arg.Fields {
 		// elt = fld
 		finalOffset += fld.Offset
 		finalOffset = CalculateDereferences(fld, finalOffset, fp)
-//	fmt.Printf("FINAL %v\n", finalOffset)
+		fmt.Printf("FINAL %v\n", finalOffset)
 	}
 
 	return finalOffset
@@ -51,7 +51,8 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 	//var isPointer bool
 	var baseOffset types.Pointer
 	var sizeofElement types.Pointer
-
+	fmt.Printf("CALCULATE_DEREFERENCES %d, %d, %s\n", finalOffset, fp, arg.ArgDetails.Name)
+	fmt.Printf("DEREF_COUNT %d\n", len(arg.DereferenceOperations))
 	idxCounter := 0
 	for _, op := range arg.DereferenceOperations {
 		switch op {
