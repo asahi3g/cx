@@ -2,7 +2,6 @@ package ast
 
 import (
     "github.com/skycoin/cx/cx/types"
-    "fmt"
 )
 
 type CXValue struct {
@@ -15,51 +14,51 @@ type CXValue struct {
 }
 
 func (value *CXValue) Get_bool() bool {
-	return types.Read_bool(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_bool(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_i8() int8 {
-	return types.Read_i8(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_i8(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_i16() int16 {
-	return types.Read_i16(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_i16(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_i32() int32 {
-	return types.Read_i32(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_i32(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_i64() int64 {
-	return types.Read_i64(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_i64(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_ui8() uint8 {
-	return types.Read_ui8(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_ui8(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_ui16() uint16 {
-	return types.Read_ui16(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_ui16(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_ui32() uint32 {
-	return types.Read_ui32(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_ui32(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_ui64() uint64 {
-	return types.Read_ui64(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_ui64(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_f32() float32 {
-	return types.Read_f32(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_f32(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_f64() float64 {
-	return types.Read_f64(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_f64(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_ptr() types.Pointer {
-	return types.Read_ptr(PROGRAM.Memory, GetSize(value.Arg))
+	return types.Read_ptr(PROGRAM.Memory, value.Offset)
 }
 
 func (value *CXValue) Get_bytes() []byte {
@@ -67,7 +66,6 @@ func (value *CXValue) Get_bytes() []byte {
 }
 
 func (value *CXValue) Get_str() string {
-	fmt.Printf("GET_STR OFFSET %d\n", value.Offset)
 	return types.Read_str(PROGRAM.Memory, value.Offset)
 }
 

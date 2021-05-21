@@ -2,14 +2,10 @@ package types
 
 import (
 	"math"
+	"fmt"
 )
 
 
-const MARK_SIZE = Pointer(1)
-const FORWARDING_ADDRESS_SIZE = TYPE_POINTER_SIZE
-const OBJECT_GC_HEADER_SIZE = MARK_SIZE + FORWARDING_ADDRESS_SIZE
-const OBJECT_SIZE = TYPE_POINTER_SIZE
-const OBJECT_HEADER_SIZE = OBJECT_GC_HEADER_SIZE + OBJECT_SIZE
 
 type AllocatorHandler func (Pointer) Pointer
 var Allocator AllocatorHandler
@@ -18,6 +14,10 @@ func panicIf(condition bool, message string) {
 	if condition {
 		panic(message)
 	}
+}
+
+func FMTDEBUG(message string) {
+	//fmt.Printf(message)
 }
 
 func (pointer Pointer) IsValid() bool {
@@ -45,6 +45,7 @@ func Read_bool(memory []byte, offset Pointer) bool {
 
 func Read_i8(memory []byte, offset Pointer) int8 {
 	memory = memory[offset:]
+	fmt.Printf("READ_I8 : OFFSET %d\n", offset)
 	panicIf(len(memory) < 1, "invalid memory len")
 	return int8(memory[0])
 }

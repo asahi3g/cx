@@ -14,10 +14,10 @@ func main()() {
 	var si []i32
 	si = append(si, 1)
 	si = fooa(&si)
-	test(len(si), 2, "")
+//	test(len(si), 2, "")
 
-	var sk []i32
-	sk = append(sk, 1)
-	foob(&sk)
-	test(len(sk), 2, "")
+//	var sk []i32
+//	sk = append(sk, 1)
+//	foob(&sk)
+//	test(len(sk), 2, "")
 }

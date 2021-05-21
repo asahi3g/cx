@@ -4,7 +4,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
     "github.com/skycoin/cx/cx/types"
-    "fmt"
+   // "fmt"
 )
 
 func SelectProgram(prgrm *ast.CXProgram) {
@@ -62,10 +62,11 @@ func WritePrimary(typ int, byts []byte, isGlobal bool) []*ast.CXExpression {
 			arg.PassBy = constants.PASSBY_REFERENCE
 			arg.Size = types.TYPE_POINTER_SIZE
 			arg.TotalSize = types.TYPE_POINTER_SIZE
+			types.Write_ptr(byts, 0, arg.Offset)
 		}
 
 
-		fmt.Printf("WRITE_PRIMARY OFFSET %d\n", arg.Offset)
+		//fmt.Printf("WRITE_PRIMARY OFFSET %d\n", arg.Offset)
 		// A CX program allocates min(INIT_HEAP_SIZE, MAX_HEAP_SIZE) bytes
 		// after the stack segment. These bytes are used to allocate the data segment
 		// at compile time. If the data segment is bigger than min(INIT_HEAP_SIZE, MAX_HEAP_SIZE),

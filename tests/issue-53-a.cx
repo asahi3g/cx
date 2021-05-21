@@ -14,6 +14,7 @@ func getAddr(addr *i32) (out i32) {
 
 func testAddr(addr *i32, taddr i32, message str) () {
 	var iaddr i32 = getAddr(addr)
+    printf("IADDR %d, TADDR %d\n", iaddr, taddr)
 	test(iaddr, taddr, message)
 }
 
@@ -71,5 +72,6 @@ func main()() {
 	test(xst1a - xst0a, 12, "main : xst1a - xst0a")
 	fooC(666, st, 777)
 	var b i32 = 888 // 56 + 4 = 60
+    printf("------> &B %v\n", &b)
 	testAddr(&b, 56, "main : &b")
 }

@@ -15,7 +15,7 @@ func GetDerefSize(arg *CXArgument) types.Pointer {
 }
 
 func PrintArg(name string, arg *CXArgument) {
-	fmt.Printf("%s %s, SIZE %d, SLICE %v, TYPE %s\n", name, arg.ArgDetails.Name, arg.Size, arg.IsSlice, constants.TypeNames[arg.Type])
+	types.FMTDEBUG(fmt.Sprintf("%s %s, SIZE %d, SLICE %v, TYPE %s\n", name, arg.ArgDetails.Name, arg.Size, arg.IsSlice, constants.TypeNames[arg.Type]))
 }
 
 //TODO: Delete this eventually
@@ -48,7 +48,7 @@ func GetFinalOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 
 func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.Pointer) types.Pointer {
 	//fmt.Printf("CALCULATE_DEREF\n")
-	var isPointer bool
+	//var isPointer bool
 	var baseOffset types.Pointer
 	var sizeofElement types.Pointer
 
@@ -56,12 +56,12 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 	for _, op := range arg.DereferenceOperations {
 		switch op {
 		case constants.DEREF_SLICE: //TODO: Move to CalculateDereference_slice
-		//	fmt.Printf("DEREF_SLICE\n")
+			fmt.Printf("DEREF_SLICE\n")
 			if len(arg.Indexes) == 0 {
 				continue
 			}
 
-			isPointer = false
+			//isPointer = false
 			finalOffset = types.Read_ptr(PROGRAM.Memory, finalOffset)
 			baseOffset = finalOffset
 
@@ -81,7 +81,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			idxCounter++
 
 		case constants.DEREF_ARRAY: //TODO: Move to CalculateDereference_array
-		//	fmt.Printf("DEREF_ARRAY\n")
+			fmt.Printf("DEREF_ARRAY\n")
 			if len(arg.Indexes) == 0 {
 				continue
 			}
@@ -103,15 +103,16 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			finalOffset += types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
 			idxCounter++
 		case constants.DEREF_POINTER: //TODO: Move to CalculateDereference_ptr
-			//fmt.Printf("DEREF_SLICE\n")
-			isPointer = true
+			fmt.Printf("DEREF_POINTER\n")
+			//isPointer = true
 			finalOffset = types.Read_ptr(PROGRAM.Memory, finalOffset)
 		}
 	}
 
 	// if finalOffset >= PROGRAM.HeapStartsAt {
-	if finalOffset >= PROGRAM.HeapStartsAt && isPointer {
+	/*if finalOffset.IsValid() && finalOffset >= PROGRAM.HeapStartsAt && isPointer {
 		// then it's an object
+		fmt.Printf("POINTER FINAL OFFSET %d\n", finalOffset)
 		finalOffset += types.OBJECT_HEADER_SIZE
 		if arg.IsSlice {
 			finalOffset += constants.SLICE_HEADER_SIZE
@@ -119,7 +120,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 				panic(constants.CX_RUNTIME_SLICE_INDEX_OUT_OF_RANGE)
 			}
 		}
-	}
+	}*/
 
 	return finalOffset
 }

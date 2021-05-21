@@ -45,7 +45,7 @@ var MAX_HEAP_FREE_RATIO float32 = 0.7
 
 const NULL_HEAP_ADDRESS_OFFSET = types.TYPE_POINTER_SIZE // TODO: PTR remove hardcoded offsets
 const NULL_HEAP_ADDRESS = types.Pointer(0) // TODO: PTR remove hardcoded offsets
-const STR_HEADER_SIZE = types.TYPE_POINTER_SIZE // TODO: PTR remove hardcoded offsets
+//const STR_HEADER_SIZE = types.TYPE_POINTER_SIZE // TODO: PTR remove hardcoded offsets
 const SLICE_HEADER_SIZE = 2*types.TYPE_POINTER_SIZE // TODO: PTR remove hardcoded offsets
 
 const MAX_UINT32 = ^uint32(0)

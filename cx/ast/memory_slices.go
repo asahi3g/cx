@@ -8,12 +8,13 @@ import (
 
 // IsValidSliceIndex ...
 func IsValidSliceIndex(offset types.Pointer, index types.Pointer, sizeofElement types.Pointer) bool {
+	fmt.Printf("IS_VALID_SLICE_INDEX OFFSET %d SIZE_OF_ELEMENT %d\n", offset, sizeofElement)
 	sliceLen := GetSliceLen(offset)
 	bytesLen := sliceLen * sizeofElement
 	index -= types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE + offset
 
-	fmt.Printf("INDEX %d BYTES_LEN %d, SIZEOF_ELEMENT %d, MOD %d\n",
-		index, bytesLen, sizeofElement, index%sizeofElement)
+	types.FMTDEBUG(fmt.Sprintf("INDEX %d BYTES_LEN %d, SIZEOF_ELEMENT %d, MOD %d\n",
+		index, bytesLen, sizeofElement, index%sizeofElement))
 	if index >= 0 && index < bytesLen && (index%sizeofElement) == 0 {
 		return true
 	}
@@ -30,10 +31,6 @@ func GetSliceOffset(fp types.Pointer, arg *CXArgument) types.Pointer {
 	return types.InvalidPointer
 }
 
-// GetObjectHeader ...
-func GetObjectHeader(offset types.Pointer) []byte {
-	return PROGRAM.Memory[offset : offset+types.OBJECT_HEADER_SIZE]
-}
 
 // GetSliceHeader ...
 func GetSliceHeader(offset types.Pointer) []byte {
@@ -87,7 +84,7 @@ func SliceResizeEx(outputSliceOffset types.Pointer, count types.Pointer, sizeofE
 		}
 		var outputObjectSize = types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE + newCap*sizeofElement
 		outputSliceOffset = AllocateSeq(outputObjectSize)
-		types.Write_ptr(GetObjectHeader(outputSliceOffset), 5, outputObjectSize) // TODO: PTR remove hardcode 5
+		types.Write_ptr(types.Get_obj_header(PROGRAM.Memory, outputSliceOffset), 5, outputObjectSize) // TODO: PTR remove hardcode 5
 
 		outputSliceHeader = GetSliceHeader(outputSliceOffset)
 	    types.Write_ptr(outputSliceHeader, 0, newCap)

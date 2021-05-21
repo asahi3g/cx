@@ -10,13 +10,10 @@ import (
 func buildString(inputs []ast.CXValue, outputs []ast.CXValue) []byte {
 	fmtStr := inputs[0].Get_str()
 
-	fmt.Printf("BUILD_STRING\n")
-
 	var res []byte
 	var specifiersCounter int
 	var lenStr = int(len(fmtStr))
 
-	fmt.Printf("FMT LEN %d, STR `%s`\n", lenStr, fmtStr)
     for c := 0; c < len(fmtStr); c++ {
 		var nextCh byte
 		ch := fmtStr[c]
@@ -88,7 +85,6 @@ func buildString(inputs []ast.CXValue, outputs []ast.CXValue) []byte {
 		}
 	}
 
-fmt.Printf("SPEC_COUNTER %d, LEN_INPUTS %d\n", specifiersCounter, len(inputs)+1)
 	if specifiersCounter != len(inputs)-1 {
 		extra := "%!(EXTRA "
 		// for _, inp := range expr.ProgramInput[:specifiersCounter] {

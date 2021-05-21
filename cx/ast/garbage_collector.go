@@ -91,10 +91,10 @@ func MarkAndCompact(prgrm *CXProgram) {
 
 	// Relocation of live objects.
 	for c := prgrm.HeapStartsAt + constants.NULL_HEAP_ADDRESS_OFFSET; c < prgrm.HeapStartsAt+prgrm.HeapPointer; {
-		objSize := types.Read_ptr(prgrm.Memory, c+types.MARK_SIZE+types.FORWARDING_ADDRESS_SIZE)
+		objSize := types.Read_obj_size(prgrm.Memory, c)
 
 		if prgrm.Memory[c] == 1 {
-			forwardingAddress := types.Read_ptr(prgrm.Memory, c+types.MARK_SIZE)
+			forwardingAddress := types.Read_obj_forwarding_address(prgrm.Memory, c)
 
 			// We update the pointers that are pointing to the just moved object.
 			updatePointers(prgrm, forwardingAddress, prgrm.HeapStartsAt+faddr)
@@ -219,10 +219,10 @@ func DisplaceReferences(prgrm *CXProgram, off types.Pointer, numPkgs int) {
 // Mark marks the object located at `heapOffset` as alive and sets the object's referencing address to `heapOffset`.
 func Mark(prgrm *CXProgram, heapOffset types.Pointer) {
 	// Marking as alive.
-	prgrm.Memory[heapOffset] = 1
+	types.Write_obj_mark(prgrm.Memory, heapOffset, 1)
 
 	// Setting forwarding address. This address is used to know where the object used to live on the heap. With it we can know what symbols were pointing to that dead object and then update their address.
-    types.Write_ptr(prgrm.Memory, heapOffset+types.MARK_SIZE, heapOffset)
+    types.Write_obj_forwarding_address(prgrm.Memory, heapOffset, heapOffset)
 }
 
 // MarkObjectsTree traverses and marks a possible tree of heap objects (slices of slices, slices of pointers, etc.).
