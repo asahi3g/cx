@@ -77,6 +77,7 @@ func RegisterOpcodes() {
 	RegisterOpCode(constants.OP_APPEND, "append", opSliceAppend, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.Slice(constants.TYPE_UNDEFINED)))
 
 	RegisterFunction("resize", opResize, In(ast.Slice(constants.TYPE_UNDEFINED), ast.ConstCxArg_I32), Out(ast.Slice(constants.TYPE_UNDEFINED)))
+	// TODO: PTR insert inputs look dubious
 	RegisterFunction("insert", opInsert, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.Slice(constants.TYPE_UNDEFINED)))
 	RegisterFunction("remove", opRemove, In(ast.Slice(constants.TYPE_UNDEFINED), ast.ConstCxArg_I32), Out(ast.Slice(constants.TYPE_UNDEFINED)))
 	RegisterFunction("copy", opCopy, In(ast.Slice(constants.TYPE_UNDEFINED), ast.Slice(constants.TYPE_UNDEFINED)), Out(ast.ConstCxArg_I32))

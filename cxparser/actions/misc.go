@@ -65,7 +65,7 @@ func WritePrimary(typ int, byts []byte, isGlobal bool) []*ast.CXExpression {
 			types.Write_ptr(byts, 0, arg.Offset)
 		}
 
-fmt.Printf("WRITE_PRIMARY %d\n", arg.Offset)
+types.FMTDEBUG(fmt.Sprintf("WRITE_PRIMARY %d\n", arg.Offset))
 
 		//fmt.Printf("WRITE_PRIMARY OFFSET %d\n", arg.Offset)
 		// A CX program allocates min(INIT_HEAP_SIZE, MAX_HEAP_SIZE) bytes

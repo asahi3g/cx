@@ -6,13 +6,56 @@ import (
 )
 
 
+const (
+	CX_SUCCESS = iota //zero can be success
+	CX_COMPILATION_ERROR
+	CX_PANIC // 2
+	CX_INTERNAL_ERROR
+	CX_ASSERT
+	CX_RUNTIME_ERROR
+	CX_RUNTIME_STACK_OVERFLOW_ERROR
+	CX_RUNTIME_HEAP_EXHAUSTED_ERROR
+	CX_RUNTIME_INVALID_ARGUMENT
+	CX_RUNTIME_SLICE_INDEX_OUT_OF_RANGE
+	CX_RUNTIME_NOT_IMPLEMENTED
+	CX_RUNTIME_INVALID_CAST
+)
+
+const BOOL_SIZE = Pointer(1)
+
+const I8_SIZE = Pointer(1)
+const I16_SIZE = Pointer(2)
+const I32_SIZE = Pointer(4)
+const I64_SIZE = Pointer(8)
+
+const UI8_SIZE = Pointer(1)
+const UI16_SIZE = Pointer(2)
+const UI32_SIZE = Pointer(4)
+const UI64_SIZE = Pointer(8)
+
+const F32_SIZE = Pointer(4)
+const F64_SIZE = Pointer(8)
+
+const STR_SIZE = TYPE_POINTER_SIZE
+
+const MAX_INT = int(MAX_UINT >> 1)
+const MAX_INT32 = int(MAX_UINT32 >> 1)
+const MIN_INT32 = -MAX_INT32 - 1
+
+const MAX_UINT = ^uint(0)
+const MAX_UINT8 = ^uint8(0)
+const MAX_UINT16 = ^uint16(0)
+const MAX_UINT32 = ^uint32(0)
+const MAX_UINT64 = ^uint64(0)
+
 
 type AllocatorHandler func (Pointer) Pointer
 var Allocator AllocatorHandler
 
-func panicIf(condition bool, message string) {
+func panicIf(condition bool, message string, error int) {
 	if condition {
-		panic(message)
+		fmt.Printf(message)
+		panic(error)
 	}
 }
 
@@ -39,57 +82,57 @@ func Cast_sint_to_sptr(value []int) []Pointer {
 
 func Read_bool(memory []byte, offset Pointer) bool {
 	memory = memory[offset:]
-	panicIf(len(memory) < 1, "invalid memory len")
+	panicIf(len(memory) < 1, "invalid memory len", CX_INTERNAL_ERROR)
 	return memory[0] != 0
 }
 
 func Read_i8(memory []byte, offset Pointer) int8 {
 	memory = memory[offset:]
 	fmt.Printf("READ_I8 : OFFSET %d\n", offset)
-	panicIf(len(memory) < 1, "invalid memory len")
+	panicIf(len(memory) < 1, "invalid memory len", CX_INTERNAL_ERROR)
 	return int8(memory[0])
 }
 
 func Read_i16(memory []byte, offset Pointer) int16 {
 	memory = memory[offset:]
-	panicIf(len(memory) < 2, "invalid memory len")
+	panicIf(len(memory) < 2, "invalid memory len", CX_INTERNAL_ERROR)
 	return int16(memory[0]) | int16(memory[1])<<8
 }
 
 func Read_i32(memory []byte, offset Pointer) int32 {
 	memory = memory[offset:]
-	panicIf(len(memory) < 4, "invalid memory len")
+	panicIf(len(memory) < 4, "invalid memory len", CX_INTERNAL_ERROR)
 	return int32(memory[0]) | int32(memory[1])<<8 | int32(memory[2])<<16 | int32(memory[3])<<24
 }
 
 func Read_i64(memory []byte, offset Pointer) int64 {
 	memory = memory[offset:]
-	panicIf(len(memory) < 8, "invalid memory len")
+	panicIf(len(memory) < 8, "invalid memory len", CX_INTERNAL_ERROR)
 	return int64(memory[0]) | int64(memory[1])<<8 | int64(memory[2])<<16 | int64(memory[3])<<24 |
 		int64(memory[4])<<32 | int64(memory[5])<<40 | int64(memory[6])<<48 | int64(memory[7])<<56
 }
 
 func Read_ui8(memory []byte, offset Pointer) uint8 {
 	memory = memory[offset:]
-	panicIf(len(memory) < 1, "invalid memory len")
+	panicIf(len(memory) < 1, "invalid memory len", CX_INTERNAL_ERROR)
 	return uint8(memory[0])
 }
 
 func Read_ui16(memory []byte, offset Pointer) uint16 {
 	memory = memory[offset:]
-	panicIf(len(memory) < 2, "invalid memory len")
+	panicIf(len(memory) < 2, "invalid memory len", CX_INTERNAL_ERROR)
 	return uint16(memory[0]) | uint16(memory[1])<<8
 }
 
 func Read_ui32(memory []byte, offset Pointer) uint32 {
 	memory = memory[offset:]
-	panicIf(len(memory) < 4, "invalid memory len")
+	panicIf(len(memory) < 4, "invalid memory len", CX_INTERNAL_ERROR)
 	return uint32(memory[0]) | uint32(memory[1])<<8 | uint32(memory[2])<<16 | uint32(memory[3])<<24
 }
 
 func Read_ui64(memory []byte, offset Pointer) uint64 {
 	memory = memory[offset:]
-	panicIf(len(memory) < 8, "invalid memory len")
+	panicIf(len(memory) < 8, "invalid memory len", CX_INTERNAL_ERROR)
 	return uint64(memory[0]) | uint64(memory[1])<<8 | uint64(memory[2])<<16 | uint64(memory[3])<<24 |
 		uint64(memory[4])<<32 | uint64(memory[5])<<40 | uint64(memory[6])<<48 | uint64(memory[7])<<56
 }

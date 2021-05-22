@@ -45,9 +45,9 @@ func GetSliceLen(offset types.Pointer) types.Pointer {
 
 // GetSlice ...
 func GetSlice(offset types.Pointer, sizeofElement types.Pointer) []byte {
-	if offset > 0 {
+	if offset > 0 && offset.IsValid() {
 		sliceLen := GetSliceLen(offset)
-		if sliceLen > 0 {
+		if sliceLen > 0 &&  sliceLen.IsValid() {
 			dataOffset := offset + types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE - 4 // TODO: PTR remove hardcode
 			dataLen := 4 + sliceLen*sizeofElement // TODO: PTR remove hardcodE
 			return PROGRAM.Memory[dataOffset : dataOffset+dataLen]
@@ -69,7 +69,7 @@ func SliceResizeEx(outputSliceOffset types.Pointer, count types.Pointer, sizeofE
 	var outputSliceHeader []byte
 	var outputSliceCap types.Pointer
 
-	if outputSliceOffset > 0 {
+	if outputSliceOffset > 0 && outputSliceOffset.IsValid() {
 		outputSliceHeader = GetSliceHeader(outputSliceOffset)
 		outputSliceCap = types.Read_ptr(outputSliceHeader, 0)
 	}
@@ -108,11 +108,11 @@ func SliceResize(fp types.Pointer, out *CXArgument, inp *CXArgument, count types
 // SliceCopyEx does the logic required by `SliceCopy`. It is separated because some other functions might have access to the offsets of the slices, but not the `CXArgument`s.
 func SliceCopyEx(outputSliceOffset types.Pointer, inputSliceOffset types.Pointer, count types.Pointer, sizeofElement types.Pointer) {
 	var inputSliceLen types.Pointer
-	if inputSliceOffset != 0 {
+	if inputSliceOffset != 0 && inputSliceOffset.IsValid() {
 		inputSliceLen = GetSliceLen(inputSliceOffset)
 	}
 
-	if outputSliceOffset > 0 {
+	if outputSliceOffset > 0 && outputSliceOffset.IsValid() {
 		outputSliceHeader := GetSliceHeader(outputSliceOffset)
 		types.Write_ptr(outputSliceHeader, 4, count) // TODO: PTR remove hardcode
 		outputSliceData := GetSliceData(outputSliceOffset, sizeofElement)
@@ -132,7 +132,7 @@ func SliceCopy(fp types.Pointer, outputSliceOffset types.Pointer, inp *CXArgumen
 func SliceAppendResize(fp types.Pointer, out *CXArgument, inp *CXArgument, sizeofElement types.Pointer) types.Pointer {
 	inputSliceOffset := GetSliceOffset(fp, inp)
 	var inputSliceLen types.Pointer
-	if inputSliceOffset != 0 {
+	if inputSliceOffset != 0 && inputSliceOffset.IsValid() {
 		inputSliceLen = GetSliceLen(inputSliceOffset)
 	}
 
@@ -160,7 +160,7 @@ func SliceInsert(fp types.Pointer, out *CXArgument, inp *CXArgument, index types
 	// outputSliceOffset := GetSliceOffset(fp, out)
 
 	var inputSliceLen types.Pointer
-	if inputSliceOffset != 0 {
+	if inputSliceOffset != 0 && inputSliceOffset.IsValid() {
 		inputSliceLen = GetSliceLen(inputSliceOffset)
 	}
 
@@ -183,7 +183,7 @@ func SliceRemove(fp types.Pointer, out *CXArgument, inp *CXArgument, index types
 	outputSliceOffset := GetSliceOffset(fp, out)
 
 	var inputSliceLen types.Pointer
-	if inputSliceOffset != 0 {
+	if inputSliceOffset != 0 && inputSliceOffset.IsValid() {
 		inputSliceLen = GetSliceLen(inputSliceOffset)
 	}
 
@@ -203,7 +203,7 @@ func SliceRemove(fp types.Pointer, out *CXArgument, inp *CXArgument, index types
 func WriteToSlice(off types.Pointer, inp []byte) types.Pointer {
 	// TODO: Check all these parses from/to int32/int.
 	var inputSliceLen types.Pointer
-	if off != 0 {
+	if off != 0 && off.IsValid() {
 		inputSliceLen = GetSliceLen(off)
 	}
 

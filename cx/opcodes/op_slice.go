@@ -4,6 +4,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
 	"github.com/skycoin/cx/cx/types"
+	"fmt"
 )
 
 //TODO: Rename opSliceLen
@@ -22,8 +23,10 @@ func opLen(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 		// TODO: Had to add elt.Lengths to avoid doing this for arrays, but not entirely sure why
 	} else if elt.Type == constants.TYPE_STR && elt.Lengths == nil {
+		fmt.Printf("READ_STR_SIZE\n")
 		sliceLen = types.Read_str_size(ast.PROGRAM.Memory, inputs[0].Offset)
 	} else {
+		fmt.Printf("READ_STR_SIZE_FUCK\n")
 		sliceLen = elt.Lengths[len(elt.Indexes)]
 	}
 
