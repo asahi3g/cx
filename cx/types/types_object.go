@@ -52,16 +52,26 @@ func Make_obj(data []byte) []byte {
 	return obj
 }
 
+func getObj(obj []byte) []byte {
+	if obj == nil {
+		return nil
+	}
+	if len(obj) < 32 {
+		return obj
+	}
+	return obj[:32]
+}
+
 func AllocWrite_obj_data(memory []byte, obj []byte) Pointer {
 	heapOffset := Allocator(Compute_obj_size(obj))
-	FMTDEBUG(fmt.Sprintf("ALLOC_WRITE_OBJ_DATA HEAPOFFSET %d, OBJ '%v'\n", heapOffset, obj))
+	FMTDEBUG(fmt.Sprintf("ALLOC_WRITE_OBJ_DATA HEAPOFFSET %d, OBJ '%v'\n", heapOffset, getObj(obj)))
 	Write_obj_data(memory, heapOffset, obj)
 	return heapOffset
 }
 
 func Write_obj_data(memory []byte, offset Pointer, obj []byte) {
 	size := Cast_int_to_ptr(len(obj))
-	FMTDEBUG(fmt.Sprintf("WRITE_OBJECT_DATA SIZE %d, OBJ `%v`\n", size, obj))
+	FMTDEBUG(fmt.Sprintf("WRITE_OBJECT_DATA SIZE %d, OBJ `%v`\n", size, getObj(obj)))
 	Write_obj_size(memory, offset, size)
 	WriteSlice_byte(memory, offset+OBJECT_HEADER_SIZE, obj)
 }
@@ -69,20 +79,23 @@ func Write_obj_data(memory []byte, offset Pointer, obj []byte) {
 func Read_obj_data(memory []byte, offset Pointer) []byte {
 	size := Read_obj_size(memory, offset)
 	obj := GetSlice_byte(memory, offset+OBJECT_HEADER_SIZE, size)
-	FMTDEBUG(fmt.Sprintf("READ_OBJECT_DATA OFFSET %d, SIZE %d OBJ `%v`\n", offset, size, obj))
+	FMTDEBUG(fmt.Sprintf("READ_OBJECT_DATA OFFSET %d, SIZE %d OBJ `%v`\n", offset, size, getObj(obj)))
 	return obj
 }
 
 func Write_obj(memory []byte, offset Pointer, obj []byte) {
 	heapOffset := AllocWrite_obj_data(memory, obj)
-	FMTDEBUG(fmt.Sprintf("WRITE_OBJ OFFSET %d, HEAPOFFSET %d, OBJ %v\n", offset, heapOffset, obj))
+	FMTDEBUG(fmt.Sprintf("WRITE_OBJ OFFSET %d, HEAPOFFSET %d, OBJ %v\n", offset, heapOffset, getObj(obj)))
 	Write_ptr(memory, offset, heapOffset)
 }
 
 func Read_obj(memory []byte, offset Pointer) []byte {
 	//panic("FUCK\n")
 	heapOffset := Read_ptr(memory, offset)
-	obj := Read_obj_data(memory, heapOffset)
-	FMTDEBUG(fmt.Sprintf("READ_OBJ OFFSET %d, HEAPOFFSET %d, OBJ `%v`\n", offset, heapOffset, obj))
-	return obj
+	if heapOffset != 0 && heapOffset.IsValid() {
+		obj := Read_obj_data(memory, heapOffset)
+		FMTDEBUG(fmt.Sprintf("READ_OBJ OFFSET %d, HEAPOFFSET %d, OBJ `%v`\n", offset, heapOffset, getObj(obj)))
+		return obj
+	}
+	return nil
 }

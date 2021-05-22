@@ -84,7 +84,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			//TODO: delete
 			sizeToUse := GetDerefSize(arg) //TODO: is always arg.Size unless arg.CustomType != nil
 			PrintArg("DEREF_SLICE: ", arg)
-			finalOffset += types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeToUse
+			finalOffset += types.Cast_i32_to_ptr(types.Read_i32(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter]))) * sizeToUse
 			//fmt.Printf("BASE_OFFSET %d, FINAL_OFFSET %d, SIZE_TO_USE %d\n",
 			//	baseOffset, finalOffset, sizeToUse)
 			if !IsValidSliceIndex(baseOffset, finalOffset, sizeToUse) {
@@ -113,7 +113,7 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			//fmt.Printf("SIZEOF_ELEMENT %d, OFFSET %d, INDEX_OFFSET %d, INDEX_VALUE %v\n",
 			//	sizeofElement, GetFinalOffset(fp, arg.Indexes[idxCounter]), tmpOO, tmpVV)
 			PrintArg("DEREF_ARRAY: ", arg)
-			finalOffset += types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
+			finalOffset += types.Cast_i32_to_ptr(types.Read_i32(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter]))) * sizeofElement
 			idxCounter++
 		case constants.DEREF_POINTER: //TODO: Move to CalculateDereference_ptr
 			types.FMTDEBUG(fmt.Sprintf("DEREF_POINTER\n"))

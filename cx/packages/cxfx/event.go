@@ -6,7 +6,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/execute"
 	"github.com/skycoin/cx/cx/types"
-	//"fmt"
+//	"fmt"
 	"sync"
 	"time"
 )
@@ -56,12 +56,15 @@ type CXCallback struct {
 
 func (cb *CXCallback) init(inputs []ast.CXValue, outputs []ast.CXValue, packageName string) {
 	cb.windowName = inputs[0].Get_str()
-	var windowName [types.TYPE_POINTER_SIZE]byte
-	types.Write_str(windowName[:], 0, cb.windowName)
-	cb.windowNameBytes = windowName[:]
+//	var windowName [types.TYPE_POINTER_SIZE]byte
+//	types.Write_str(windowName[:], 0, cb.windowName)
+//	cb.windowNameBytes = windowName[:]
 	cb.functionName = inputs[1].Get_str()
 	cb.packageName = packageName
 }
+
+
+
 
 func (cb *CXCallback) Init(inputs []ast.CXValue, outputs []ast.CXValue) {
 	cb.init(inputs, outputs, inputs[0].Expr.Package.Name)

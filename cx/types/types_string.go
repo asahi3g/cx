@@ -31,5 +31,9 @@ func Read_str(memory []byte, offset Pointer) string {
 }
 
 func Read_str_size(memory []byte, offset Pointer) Pointer {
-	return Read_obj_size(memory, offset)
+	heapOffset := Read_ptr(memory, offset)
+	if heapOffset > 0 && heapOffset.IsValid() {
+		return Read_obj_size(memory, heapOffset)
+	}
+	return 0
 }

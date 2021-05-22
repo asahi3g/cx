@@ -38,6 +38,7 @@ func buildString(inputs []ast.CXValue, outputs []ast.CXValue) []byte {
 		
 		if ch == '%' {
 			if specifiersCounter+1 == len(inputs) {
+				fmt.Printf("FUCK_MISSING \n")
 				res = append(res, []byte(fmt.Sprintf("%%!%c(MISSING)", nextCh))...)
 				c++
 				continue
