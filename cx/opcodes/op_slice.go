@@ -4,6 +4,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
 	"github.com/skycoin/cx/cx/types"
+	"fmt"
 )
 
 //TODO: Rename opSliceLen
@@ -13,13 +14,16 @@ func opLen(inputs []ast.CXValue, outputs []ast.CXValue) {
 
 	var sliceLen types.Pointer
 	if elt.IsSlice || elt.Type == constants.TYPE_AFF { //TODO: FIX
+		fmt.Printf("OP_LEN OFFSET %d\n", inputs[0].Offset)
 		sliceOffset := types.Read_ptr(ast.PROGRAM.Memory, inputs[0].Offset)
+		fmt.Printf("OP_LEN SLICE_OFFSET %d\n", sliceOffset)
 		if sliceOffset > 0 {
 			sliceLen = ast.GetSliceLen(sliceOffset) // TODO: PTR remove hardcode 4
 		} else if sliceOffset < 0 {
 			panic(constants.CX_RUNTIME_ERROR)
 		}
 
+		fmt.Printf("OP_LEN  %d\n", sliceLen)
 		// TODO: Had to add elt.Lengths to avoid doing this for arrays, but not entirely sure why
 	} else if elt.Type == constants.TYPE_STR && elt.Lengths == nil {
 		sliceLen = types.Read_str_size(ast.PROGRAM.Memory, inputs[0].Offset)
