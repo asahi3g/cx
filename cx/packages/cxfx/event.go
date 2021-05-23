@@ -76,12 +76,8 @@ func (cb *CXCallback) InitEx(inputs []ast.CXValue, outputs []ast.CXValue) {
 }
 
 func (cb *CXCallback) Call(inputs [][]byte) {
-	fmt.Printf("CXCallback.Call `%s`, `%s`\n", cb.functionName, cb.packageName)
 	if fn, err := ast.PROGRAM.GetFunction(cb.functionName, cb.packageName); err == nil {
-		fmt.Printf("FUNCTION FOUND\n")
 		execute.Callback(ast.PROGRAM, fn, inputs)
-	} else {
-		fmt.Printf("FUNCTION NOT FOUND\n")
 	}
 }
 

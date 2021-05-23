@@ -69,7 +69,6 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 	for _, op := range arg.DereferenceOperations {
 		switch op {
 		case constants.DEREF_SLICE: //TODO: Move to CalculateDereference_slice
-			types.FMTDEBUG(fmt.Sprintf("DEREF_SLICE\n"))
 			if len(arg.Indexes) == 0 {
 				continue
 			}
@@ -83,7 +82,6 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 
 			//TODO: delete
 			sizeToUse := GetDerefSize(arg) //TODO: is always arg.Size unless arg.CustomType != nil
-			PrintArg("DEREF_SLICE: ", arg)
 			finalOffset += types.Cast_i32_to_ptr(types.Read_i32(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter]))) * sizeToUse // TODO: PTR Use Read_ptr 
 			//fmt.Printf("BASE_OFFSET %d, FINAL_OFFSET %d, SIZE_TO_USE %d\n",
 			//	baseOffset, finalOffset, sizeToUse)
@@ -94,7 +92,6 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			idxCounter++
 
 		case constants.DEREF_ARRAY: //TODO: Move to CalculateDereference_array
-			types.FMTDEBUG(fmt.Sprintf("DEREF_ARRAY\n"))
 			if len(arg.Indexes) == 0 {
 				continue
 			}
@@ -112,11 +109,9 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 			//tmpVV := types.Read_ptr(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter])) * sizeofElement
 			//fmt.Printf("SIZEOF_ELEMENT %d, OFFSET %d, INDEX_OFFSET %d, INDEX_VALUE %v\n",
 			//	sizeofElement, GetFinalOffset(fp, arg.Indexes[idxCounter]), tmpOO, tmpVV)
-			PrintArg("DEREF_ARRAY: ", arg)
 			finalOffset += types.Cast_i32_to_ptr(types.Read_i32(PROGRAM.Memory, GetFinalOffset(fp, arg.Indexes[idxCounter]))) * sizeofElement // TODO: PTR Use Read_ptr
 			idxCounter++
 		case constants.DEREF_POINTER: //TODO: Move to CalculateDereference_ptr
-			types.FMTDEBUG(fmt.Sprintf("DEREF_POINTER\n"))
 			isPointer = true
 			finalOffset = types.Read_ptr(PROGRAM.Memory, finalOffset)
 		}
@@ -125,7 +120,6 @@ func CalculateDereferences(arg *CXArgument, finalOffset types.Pointer, fp types.
 	// if finalOffset >= PROGRAM.HeapStartsAt {
 	if finalOffset.IsValid() && finalOffset >= PROGRAM.HeapStartsAt && isPointer {
 		// then it's an object
-		fmt.Printf("PROGRAM HEAP_START FINAL_OFFSET %d\n", finalOffset)
 		finalOffset += types.OBJECT_HEADER_SIZE
 		if arg.IsSlice {
 			finalOffset += constants.SLICE_HEADER_SIZE

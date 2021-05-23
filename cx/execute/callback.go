@@ -43,7 +43,7 @@ func Callback(cxprogram *ast.CXProgram, fn *ast.CXFunction, inputs [][]byte) (ou
 //	fmt.Printf("EXECUTE_CALLBACK 2\n")
 	//types.DEBUG = true
 	//err := cxprogram.Run(true, &nCalls, previousCall)
-	err := RunCxAst(cxprogram, true, &nCalls, types.InvalidPointer)
+	err := RunCxAst(cxprogram, true, &nCalls, previousCall)
 	if err != nil {
 		os.Exit(constants.CX_INTERNAL_ERROR)
 	}

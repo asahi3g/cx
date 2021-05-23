@@ -12,7 +12,6 @@ import (
 // Only called in this file
 // TODO: What does this do? Is it named poorly?
 func ToCall(cxprogram *ast.CXProgram) *ast.CXExpression {
-	fmt.Printf("TO_CALL\n")
 	for c := cxprogram.CallCounter - 1; c >= 0; c-- {
 		if cxprogram.CallStack[c].Line+1 >= len(cxprogram.CallStack[c].Operator.Expressions) {
 			// then it'll also return from this function call; continue
@@ -27,14 +26,12 @@ func ToCall(cxprogram *ast.CXProgram) *ast.CXExpression {
 }
 
 func RunCxAst(cxprogram *ast.CXProgram, untilEnd bool, nCalls *int, untilCall types.Pointer) error {
-	types.FMTDEBUG("RUN_CX_AST\n")
 	defer ast.RuntimeError()
 	var err error
 
 	var inputs []ast.CXValue
 	var outputs []ast.CXValue
-	types.FMTDEBUG(fmt.Sprintf("CALL_COUNTER %d, UNTIL_CALL %d\n", cxprogram.CallCounter, untilCall))
-	for !cxprogram.Terminated && (untilEnd || *nCalls != 0) && cxprogram.CallCounter < untilCall {
+	for !cxprogram.Terminated && (untilEnd || *nCalls != 0) && (!untilCall.IsValid() || cxprogram.CallCounter > untilCall) {
 		call := &cxprogram.CallStack[cxprogram.CallCounter]
 
 		// checking if enough memory in stack

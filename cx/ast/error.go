@@ -64,7 +64,7 @@ func RuntimeError() {
 		switch r {
 		case constants.STACK_OVERFLOW_ERROR:
 			call := PROGRAM.CallStack[PROGRAM.CallCounter]
-			if PROGRAM.CallCounter > 0 {
+			if PROGRAM.CallCounter > 0 { // TODO: FMT check all CallCounter Calls.
 				PROGRAM.CallCounter--
 				PROGRAM.StackPointer = call.FramePointer
 				RuntimeErrorInfo(r, true, constants.CX_RUNTIME_STACK_OVERFLOW_ERROR)

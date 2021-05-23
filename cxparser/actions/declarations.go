@@ -42,7 +42,6 @@ func DeclareGlobalInPackage(pkg *ast.CXPackage,
 	initializer []*ast.CXExpression, doesInitialize bool) {
 	declaration_specifiers.ArgDetails.Package = pkg
 
-fmt.Printf("DECLARE_GLOBAL_INPACKAGE\n")
 	// Treat the name a bit different whether it's defined already or not.
 	if glbl, err := pkg.GetGlobal(declarator.ArgDetails.Name); err == nil {
 		// The name is already defined.
@@ -50,12 +49,10 @@ fmt.Printf("DECLARE_GLOBAL_INPACKAGE\n")
 		if glbl.Offset < 0 || glbl.Size == 0 || glbl.TotalSize == 0 {
 			// then it was only added a reference to the symbol
 			var offExpr []*ast.CXExpression
-			if declaration_specifiers.IsSlice {
-			fmt.Printf("---------------> WP A\n")
+			if declaration_specifiers.IsSlice { // TODO: PTR rework move in WritePrimary
 				offExpr = WritePrimary(declaration_specifiers.Type,
 					make([]byte, declaration_specifiers.Size), true)
 			} else {
-			fmt.Printf("---------------> WP B\n")
 				offExpr = WritePrimary(declaration_specifiers.Type,
 					make([]byte, declaration_specifiers.TotalSize), false)
 			}
@@ -117,11 +114,9 @@ fmt.Printf("DECLARE_GLOBAL_INPACKAGE\n")
 	} else {
 		// then it hasn't been defined
 		var offExpr []*ast.CXExpression
-		if declaration_specifiers.IsSlice {
-			fmt.Printf("---------------> WP C\n")
+		if declaration_specifiers.IsSlice { // TODO: PTR rework, move in WritePrimary
 			offExpr = WritePrimary(declaration_specifiers.Type, make([]byte, declaration_specifiers.Size), true)
 		} else {
-			fmt.Printf("---------------> WP D\n")
 			offExpr = WritePrimary(declaration_specifiers.Type, make([]byte, declaration_specifiers.TotalSize), false)
 		}
 
