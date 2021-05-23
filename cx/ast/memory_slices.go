@@ -8,7 +8,6 @@ import (
 
 // IsValidSliceIndex ...
 func IsValidSliceIndex(offset types.Pointer, index types.Pointer, sizeofElement types.Pointer) bool {
-	fmt.Printf("IS_VALID_SLICE_INDEX OFFSET %d SIZE_OF_ELEMENT %d\n", offset, sizeofElement)
 	sliceLen := GetSliceLen(offset)
 	bytesLen := sliceLen * sizeofElement
 	index -= types.OBJECT_HEADER_SIZE + constants.SLICE_HEADER_SIZE + offset

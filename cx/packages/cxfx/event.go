@@ -6,7 +6,7 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/execute"
 	"github.com/skycoin/cx/cx/types"
-//	"fmt"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -56,9 +56,10 @@ type CXCallback struct {
 
 func (cb *CXCallback) init(inputs []ast.CXValue, outputs []ast.CXValue, packageName string) {
 	cb.windowName = inputs[0].Get_str()
-//	var windowName [types.TYPE_POINTER_SIZE]byte
-//	types.Write_str(windowName[:], 0, cb.windowName)
-//	cb.windowNameBytes = windowName[:]
+	var windowHeapPtr = types.AllocWrite_obj_data(ast.PROGRAM.Memory, []byte(cb.windowName))
+	var windowName [types.TYPE_POINTER_SIZE]byte
+	types.Write_ptr(windowName[:], 0, windowHeapPtr)
+	cb.windowNameBytes = windowName[:]
 	cb.functionName = inputs[1].Get_str()
 	cb.packageName = packageName
 }
@@ -75,8 +76,12 @@ func (cb *CXCallback) InitEx(inputs []ast.CXValue, outputs []ast.CXValue) {
 }
 
 func (cb *CXCallback) Call(inputs [][]byte) {
+	fmt.Printf("CXCallback.Call `%s`, `%s`\n", cb.functionName, cb.packageName)
 	if fn, err := ast.PROGRAM.GetFunction(cb.functionName, cb.packageName); err == nil {
+		fmt.Printf("FUNCTION FOUND\n")
 		execute.Callback(ast.PROGRAM, fn, inputs)
+	} else {
+		fmt.Printf("FUNCTION NOT FOUND\n")
 	}
 }
 
@@ -197,6 +202,7 @@ func PollEvents() {
 		e := polled[i]
 		switch e.eventType {
 		case APP_START:
+			fmt.Printf("POLL_EVENTS APP_START\n")
 			var inputs [][]byte = make([][]byte, 1)
 			inputs[0] = appStartCallback.windowNameBytes
 			appStartCallback.Call(inputs)

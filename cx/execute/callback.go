@@ -5,6 +5,7 @@ import (
 	"github.com/skycoin/cx/cx/constants"
     "github.com/skycoin/cx/cx/types"
 	"os"
+//	"fmt"
 )
 
 //TODO: Define Function Pointers and deprecate Callback
@@ -15,6 +16,7 @@ import (
 // TODO: We probably dont need this? HTTPHandle can work in another way
 //TODO: Is Callback actually "CallFunction" ?
 func Callback(cxprogram *ast.CXProgram, fn *ast.CXFunction, inputs [][]byte) (outputs [][]byte) {
+//	fmt.Printf("EXECUTE_CALLBACK\n")
 	line := cxprogram.CallStack[cxprogram.CallCounter].Line
 	previousCall := cxprogram.CallCounter
 	cxprogram.CallCounter++
@@ -25,22 +27,27 @@ func Callback(cxprogram *ast.CXProgram, fn *ast.CXFunction, inputs [][]byte) (ou
 	cxprogram.StackPointer += newCall.Operator.Size
 	newFP := newCall.FramePointer
 
+//	fmt.Printf("EXECUTE_CALLBACK 0\n")
 	// wiping next mem frame (removing garbage)
 	for c := types.Pointer(0); c < fn.Size; c++ {
 		cxprogram.Memory[newFP+c] = 0
 	}
 
+//	fmt.Printf("EXECUTE_CALLBACK 1\n")
 	for i, inp := range inputs {
 		types.WriteSlice_byte(cxprogram.Memory, ast.GetFinalOffset(newFP, newCall.Operator.Inputs[i]), inp)
 	}
 
 	var nCalls = 0
 
+//	fmt.Printf("EXECUTE_CALLBACK 2\n")
+	//types.DEBUG = true
 	//err := cxprogram.Run(true, &nCalls, previousCall)
-	err := RunCxAst(cxprogram, true, &nCalls, previousCall)
+	err := RunCxAst(cxprogram, true, &nCalls, types.InvalidPointer)
 	if err != nil {
 		os.Exit(constants.CX_INTERNAL_ERROR)
 	}
+   //types.DEBUG = false
 
 	cxprogram.CallCounter = previousCall
 	cxprogram.CallStack[cxprogram.CallCounter].Line = line

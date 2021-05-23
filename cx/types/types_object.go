@@ -48,6 +48,7 @@ func Write_obj_forwarding_address(memory []byte, offset Pointer, address Pointer
 func Make_obj(data []byte) []byte {
 	size := Compute_obj_size(data)
 	obj := make([]byte, size)	
+	//fmt.Printf("MAKE_OBJ SIZE %d, LEN_DATA %d, LEN_OBJ %d\n", size, len(data), len(obj))
 	Write_obj_data(obj, 0, data)
 	return obj
 }

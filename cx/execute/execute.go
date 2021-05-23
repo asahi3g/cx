@@ -5,7 +5,6 @@ import (
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
     "github.com/skycoin/cx/cx/types"
-	"github.com/skycoin/skycoin/src/cipher/encoder"
 	"math/rand"
 	"time"
 )
@@ -161,14 +160,7 @@ func RunCompiled(cxprogram *ast.CXProgram, nCalls int, args []string) error {
 					argsOffset := types.Pointer(0)
 					if osGbl, err := osPkg.GetGlobal(constants.OS_ARGS); err == nil {
 						for _, arg := range args {
-							argBytes := encoder.Serialize(arg)
-							argOffset := ast.AllocateSeq(types.Cast_int_to_ptr(len(argBytes)) + types.OBJECT_HEADER_SIZE)
-
-							var header = make([]byte, types.OBJECT_HEADER_SIZE)
-							types.Write_ptr(header, 5, types.Cast_ui64_to_ptr(encoder.Size(arg))+types.OBJECT_HEADER_SIZE) // TODO: PTR remove hardcode 5
-							obj := append(header, argBytes...)
-
-							types.WriteSlice_byte(cxprogram.Memory, argOffset, obj)
+							argOffset := types.AllocWrite_obj_data(cxprogram.Memory, []byte(arg))
 
 							var argOffsetBytes [types.TYPE_POINTER_SIZE]byte
 							types.Write_ptr(argOffsetBytes[:], 0, argOffset)
