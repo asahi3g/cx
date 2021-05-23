@@ -156,7 +156,7 @@ func runTestCases(t *runner.TestRunner) {
 	t.Run("--cxpath test-workspace test-workspace-a.cx", runner.CxSuccess, "Testing if CX can set a workspace and then import a library, taking that workspace as the new relative path.")
 	t.Run("--cxpath test-workspace test-workspace-b.cx", runner.CxSuccess, "Testing if CX can set a workspace and then import a nested library, taking that workspace as the new relative path.")
 	t.Run("--cxpath test-workspace test-workspace-c.cx test-workspace-d.cx", runner.CxSuccess, "Testing if files supplied to the CLI override libraries in the workspace.")
-	t.Run("test-slices-index-out-of-range-a.cx", runner.CxRuntimeSliceIndexOutOfRange, "Test index < 0")
+	t.Run("test-slices-index-out-of-range-a.cx", runner.CxRuntimeInvalidCast, "Test index < 0")
 	t.Run("test-slices-index-out-of-range-b.cx", runner.CxRuntimeSliceIndexOutOfRange, "Test index >= len")
 	t.Run("test-slices-resize-out-of-range-a.cx", runner.CxRuntimeSliceIndexOutOfRange, "Test out of range after resize")
 	t.Run("test-slices-resize-out-of-range-b.cx", runner.CxRuntimeInvalidCast, "Test resize with count < 0")

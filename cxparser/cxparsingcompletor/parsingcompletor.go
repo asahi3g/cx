@@ -5,6 +5,7 @@ package parsingcompletor
 import __yyfmt__ "fmt"
 
 import (
+	"fmt"
 	"github.com/skycoin/cx/cx/ast"
 	"github.com/skycoin/cx/cx/constants"
 	"github.com/skycoin/cx/cx/types"
@@ -1775,6 +1776,7 @@ yynewstate:
 		}
 	case 41:
 		{
+			fmt.Printf("ADDING DECL_SLICE\n")
 			yyVAL.argument = actions.DeclarationSpecifiers(yyS[yypt-0].argument, []types.Pointer{0}, constants.DECL_SLICE)
 		}
 	case 42:

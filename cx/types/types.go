@@ -62,7 +62,7 @@ func panicIf(condition bool, message string, error int) {
 var DEBUG bool = true
 func FMTDEBUG(message string) {
 	if DEBUG {
-	fmt.Printf(message)
+	//fmt.Printf(message)
 }
 }
 

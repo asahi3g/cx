@@ -7,6 +7,7 @@
 		"github.com/skycoin/cx/cx/constants"
         "github.com/skycoin/cx/cx/types"
 		"github.com/skycoin/cx/cxparser/actions"
+        "fmt"
 	)
 
 /*
@@ -412,6 +413,7 @@ declaration_specifiers:
         //         }
         |       LBRACK RBRACK declaration_specifiers
                 {
+                fmt.Printf("ADDING DECL_SLICE\n")
 			$$ = actions.DeclarationSpecifiers($3, []types.Pointer{0}, constants.DECL_SLICE)
                 }
         |       type_specifier

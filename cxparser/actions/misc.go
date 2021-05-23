@@ -45,8 +45,9 @@ func hasDerefOp(arg *ast.CXArgument, spec int) bool {
 	return found
 }
 
+
 // This function writes those bytes to AST.Data
-func WritePrimary(typ int, byts []byte, isGlobal bool) []*ast.CXExpression {
+func WritePrimary(typ int, byts []byte, isSlice bool) []*ast.CXExpression {
 	if pkg, err := AST.GetCurrentPackage(); err == nil {
 		arg := ast.MakeArgument("", CurrentFile, LineNo)
 		arg.AddType(constants.TypeNames[typ])
@@ -62,7 +63,9 @@ func WritePrimary(typ int, byts []byte, isGlobal bool) []*ast.CXExpression {
 			arg.PassBy = constants.PASSBY_REFERENCE
 			arg.Size = types.TYPE_POINTER_SIZE
 			arg.TotalSize = types.TYPE_POINTER_SIZE
-			types.Write_ptr(byts, 0, arg.Offset)
+			if isSlice == false {
+				types.Write_ptr(byts, 0, arg.Offset)
+			}
 		}
 
 types.FMTDEBUG(fmt.Sprintf("WRITE_PRIMARY %d\n", arg.Offset))

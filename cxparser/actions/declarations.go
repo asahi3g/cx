@@ -42,6 +42,7 @@ func DeclareGlobalInPackage(pkg *ast.CXPackage,
 	initializer []*ast.CXExpression, doesInitialize bool) {
 	declaration_specifiers.ArgDetails.Package = pkg
 
+fmt.Printf("DECLARE_GLOBAL_INPACKAGE\n")
 	// Treat the name a bit different whether it's defined already or not.
 	if glbl, err := pkg.GetGlobal(declarator.ArgDetails.Name); err == nil {
 		// The name is already defined.
@@ -50,11 +51,13 @@ func DeclareGlobalInPackage(pkg *ast.CXPackage,
 			// then it was only added a reference to the symbol
 			var offExpr []*ast.CXExpression
 			if declaration_specifiers.IsSlice {
+			fmt.Printf("---------------> WP A\n")
 				offExpr = WritePrimary(declaration_specifiers.Type,
 					make([]byte, declaration_specifiers.Size), true)
 			} else {
+			fmt.Printf("---------------> WP B\n")
 				offExpr = WritePrimary(declaration_specifiers.Type,
-					make([]byte, declaration_specifiers.TotalSize), true)
+					make([]byte, declaration_specifiers.TotalSize), false)
 			}
 
 			glbl.Offset = offExpr[0].Outputs[0].Offset
@@ -115,9 +118,11 @@ func DeclareGlobalInPackage(pkg *ast.CXPackage,
 		// then it hasn't been defined
 		var offExpr []*ast.CXExpression
 		if declaration_specifiers.IsSlice {
+			fmt.Printf("---------------> WP C\n")
 			offExpr = WritePrimary(declaration_specifiers.Type, make([]byte, declaration_specifiers.Size), true)
 		} else {
-			offExpr = WritePrimary(declaration_specifiers.Type, make([]byte, declaration_specifiers.TotalSize), true)
+			fmt.Printf("---------------> WP D\n")
+			offExpr = WritePrimary(declaration_specifiers.Type, make([]byte, declaration_specifiers.TotalSize), false)
 		}
 
 		// Checking if something is supposed to be initialized
@@ -164,7 +169,7 @@ func DeclareGlobalInPackage(pkg *ast.CXPackage,
 				globals.SysInitExprs = append(globals.SysInitExprs, initializer...)
 			}
 		} else {
-			// offExpr := WritePrimary(declaration_specifiers.Type, make([]byte, declaration_specifiers.Size), true)
+			// offExpr := WritePrimary(declaration_specifiers.Type, make([]byte, declaration_specifiers.Size), false)
 			// exprOut := expr[0].ProgramOutput[0]
 
 			declaration_specifiers.ArgDetails.Name = declarator.ArgDetails.Name
